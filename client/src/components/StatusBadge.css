@@ -1,0 +1,73 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.status-open {
+  background: var(--color-status-open);
+  color: var(--color-status-open-text);
+  border-color: var(--color-status-open-text);
+}
+
+.status-pending {
+  background: var(--color-status-pending);
+  color: var(--color-status-pending-text);
+  border-color: var(--color-status-pending-text);
+}
+
+.status-confirmed {
+  background: var(--color-status-confirmed);
+  color: var(--color-status-confirmed-text);
+  border-color: var(--color-status-confirmed-text);
+}
+
+.status-closed {
+  background: var(--color-status-closed);
+  color: var(--color-status-closed-text);
+  border-color: var(--color-status-closed-text);
+}
+
+.status-transferred {
+  background: var(--color-status-transferred);
+  color: var(--color-status-transferred-text);
+  border-color: var(--color-status-transferred-text);
+}
+
+.status-delayed {
+  background: #fecaca;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.status-ontime {
+  background: #bbf7d0;
+  color: #16a34a;
+  border-color: #16a34a;
+}
+
+.status-ord {
+  background: #dbeafe;
+  color: #2563eb;
+  border-color: #2563eb;
+}
+
+.status-default {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.status-badge:hover {
+  opacity: 0.85;
+}
+

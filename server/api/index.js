@@ -16,7 +16,12 @@ app.use(express.json())
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    supabase_url: process.env.SUPABASE_URL ? 'configured' : 'missing',
+    supabase_key: process.env.SUPABASE_ANON_KEY ? 'configured' : 'missing'
+  })
 })
 
 // Routes

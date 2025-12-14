@@ -1,14 +1,19 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Ticket, Users, Train, Search, Bell, Settings, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, Ticket, Users, Train, Search, Bell, Settings, HelpCircle, Menu, X } from 'lucide-react'
 import { useFilters } from '../hooks/useFilters'
 import TicketModal from './TicketModal'
+import NotificationsPanel from './NotificationsPanel'
+import SettingsPanel from './SettingsPanel'
 import './NavBar.css'
 
 function NavBar() {
   const { searchTerm, setSearchTerm, overviewCounts } = useFilters()
   const [showTicketModal, setShowTicketModal] = useState(false)
   const [ticketType, setTicketType] = useState('guest_request')
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -20,15 +25,31 @@ function NavBar() {
   const handleCreateTicket = (type) => {
     setTicketType(type)
     setShowTicketModal(true)
+    setMobileMenuOpen(false)
   }
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value)
   }
 
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications)
+    setShowSettings(false)
+  }
+
+  const toggleSettings = () => {
+    setShowSettings(!showSettings)
+    setShowNotifications(false)
+  }
+
   return (
     <>
       <header className="navbar">
+        {/* Mobile menu button */}
+        <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
         <div className="navbar-brand">
           <div className="navbar-logo">
             <span className="logo-icon">F</span>
@@ -36,27 +57,38 @@ function NavBar() {
           <span className="navbar-title">Fitz Companion</span>
         </div>
 
-        <nav className="navbar-nav">
+        <nav className={`navbar-nav ${mobileMenuOpen ? 'open' : ''}`}>
           {navItems.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileMenuOpen(false)}
             >
               <item.icon size={16} />
               <span>{item.label}</span>
             </NavLink>
           ))}
+          
+          {/* Mobile-only action buttons */}
+          <div className="mobile-actions">
+            <button className="navbar-btn primary" onClick={() => handleCreateTicket('guest_request')}>
+              + Guest Request
+            </button>
+            <button className="navbar-btn secondary" onClick={() => handleCreateTicket('internal_request')}>
+              + Internal Request
+            </button>
+          </div>
         </nav>
 
         <div className="navbar-actions">
           <button className="navbar-btn primary" onClick={() => handleCreateTicket('guest_request')}>
             <span className="btn-plus">+</span>
-            Guest Request
+            <span className="btn-text">Guest Request</span>
           </button>
           <button className="navbar-btn secondary" onClick={() => handleCreateTicket('internal_request')}>
             <span className="btn-plus">+</span>
-            Internal Request
+            <span className="btn-text">Internal Request</span>
           </button>
         </div>
 
@@ -73,11 +105,19 @@ function NavBar() {
           <button className="navbar-icon-btn" title="Support">
             <HelpCircle size={18} />
           </button>
-          <button className="navbar-icon-btn has-badge" title="Notifications">
+          <button 
+            className={`navbar-icon-btn has-badge ${showNotifications ? 'active' : ''}`} 
+            title="Notifications"
+            onClick={toggleNotifications}
+          >
             <Bell size={18} />
             {overviewCounts?.alerts > 0 && <span className="badge">{overviewCounts.alerts}</span>}
           </button>
-          <button className="navbar-icon-btn" title="Settings">
+          <button 
+            className={`navbar-icon-btn ${showSettings ? 'active' : ''}`} 
+            title="Settings"
+            onClick={toggleSettings}
+          >
             <Settings size={18} />
           </button>
           <div className="navbar-user">
@@ -85,6 +125,9 @@ function NavBar() {
           </div>
         </div>
       </header>
+
+      {/* Mobile overlay */}
+      {mobileMenuOpen && <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)} />}
 
       {showTicketModal && (
         <TicketModal
@@ -94,6 +137,14 @@ function NavBar() {
             setShowTicketModal(false)
           }}
         />
+      )}
+
+      {showNotifications && (
+        <NotificationsPanel onClose={() => setShowNotifications(false)} />
+      )}
+
+      {showSettings && (
+        <SettingsPanel onClose={() => setShowSettings(false)} />
       )}
     </>
   )

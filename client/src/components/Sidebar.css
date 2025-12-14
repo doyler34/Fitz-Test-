@@ -252,3 +252,16 @@
   color: var(--color-text-muted);
 }
 
+/* Mobile Styles */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
+

@@ -78,6 +78,15 @@ function NavBar() {
             <button className="navbar-btn secondary" onClick={() => handleCreateTicket('internal_request')}>
               + Internal Request
             </button>
+            <button className="mobile-menu-btn-item" onClick={() => { toggleNotifications(); setMobileMenuOpen(false); }}>
+              <Bell size={18} />
+              <span>Notifications</span>
+              {overviewCounts?.alerts > 0 && <span className="mobile-badge">{overviewCounts.alerts}</span>}
+            </button>
+            <button className="mobile-menu-btn-item" onClick={() => { toggleSettings(); setMobileMenuOpen(false); }}>
+              <Settings size={18} />
+              <span>Settings</span>
+            </button>
           </div>
         </nav>
 

@@ -191,9 +191,20 @@
 /* Mobile */
 @media (max-width: 768px) {
   .notifications-panel {
-    right: 10px;
-    left: 10px;
-    width: auto;
+    top: var(--topbar-height);
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-height: calc(100vh - var(--topbar-height));
+    border-radius: 0;
+  }
+
+  .notification-summary {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
 }
+
+
 

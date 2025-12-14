@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Filter, RefreshCw, FileText, X } from 'lucide-react'
 import TimelineRow from '../components/TimelineRow'
 import TicketDetailPanel from '../components/TicketDetailPanel'
+import StatusBadge from '../components/StatusBadge'
 import { useFilters } from '../hooks/useFilters'
 import './Dashboard.css'
 
@@ -191,8 +192,8 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Timeline */}
-      <div className="timeline">
+      {/* Timeline - Desktop */}
+      <div className="timeline desktop-timeline">
         {loading ? (
           <div className="loading-message">Loading...</div>
         ) : relevantHours.length === 0 ? (
@@ -215,6 +216,48 @@ function Dashboard() {
               </div>
             </div>
           ))
+        )}
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="mobile-ticket-list">
+        {loading ? (
+          <div className="loading-message">Loading...</div>
+        ) : (filteredTickets || []).filter(item => item.type !== 'note').length === 0 ? (
+          <div className="empty-message">No tickets for selected filters</div>
+        ) : (
+          (filteredTickets || [])
+            .filter(item => item.type !== 'note')
+            .map(item => {
+              const time = new Date(item.time || item.scheduled_time)
+              const timeStr = time.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+              })
+              return (
+                <div 
+                  key={item.id} 
+                  className="mobile-ticket-card"
+                  onClick={() => handleItemClick(item)}
+                >
+                  <div className="mobile-card-header">
+                    <div className="mobile-card-time">{timeStr}</div>
+                    <StatusBadge status={item.status} />
+                  </div>
+                  <div className="mobile-card-guest">
+                    {item.guestName || item.guest_name || 'Internal'}
+                    {item.roomNumber || item.room_number ? ` • Room ${item.roomNumber || item.room_number}` : ''}
+                  </div>
+                  <div className="mobile-card-summary">{item.summary}</div>
+                  {(item.priority === 'high' || item.priority === 'urgent') && (
+                    <div className="mobile-card-priority">
+                      {item.priority?.toUpperCase()} Priority
+                    </div>
+                  )}
+                </div>
+              )
+            })
         )}
       </div>
 

@@ -139,3 +139,5 @@ INSERT INTO internal_notes (content, priority)
 VALUES ('VIP guest arriving tomorrow - Suite 501 needs special preparation', 'high')
 ON CONFLICT DO NOTHING;
 
+
+

@@ -303,6 +303,40 @@
     padding: var(--space-md);
   }
 
+  .mobile-menu-btn-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+
+  .mobile-menu-btn-item:hover {
+    background: rgba(255,255,255,0.2);
+  }
+
+  .mobile-badge {
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--color-action);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .navbar-actions {
     display: none;
   }

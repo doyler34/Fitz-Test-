@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { X, Clock, User, MapPin, Send, Bell, Mail } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Clock, User, MapPin, Send, Bell, Mail, Check } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 import { tickets as ticketsApi } from '../services/api'
 import './TicketDetailPanel.css'
@@ -7,18 +7,53 @@ import './TicketDetailPanel.css'
 function TicketDetailPanel({ item, onClose, onUpdate }) {
   const [newNote, setNewNote] = useState('')
   const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState(item.status)
+  const [status, setStatus] = useState(item?.status?.toLowerCase() || 'open')
+  const [notes, setNotes] = useState([])
+  const [message, setMessage] = useState(null)
+
+  // Get the ticket ID from item
+  const ticketId = item?.id
+
+  // Fetch full ticket details with notes
+  useEffect(() => {
+    if (ticketId) {
+      fetchTicketDetails()
+    }
+  }, [ticketId])
+
+  const fetchTicketDetails = async () => {
+    try {
+      const data = await ticketsApi.get(ticketId)
+      if (data?.notes) {
+        setNotes(data.notes)
+      }
+      if (data?.status) {
+        setStatus(data.status.toLowerCase())
+      }
+    } catch (err) {
+      console.log('Could not fetch ticket details:', err.message)
+    }
+  }
+
+  const showMessage = (text, type = 'success') => {
+    setMessage({ text, type })
+    setTimeout(() => setMessage(null), 3000)
+  }
 
   const handleStatusChange = async (newStatus) => {
+    if (!ticketId) {
+      showMessage('Cannot update - ticket ID missing', 'error')
+      return
+    }
     setLoading(true)
     try {
-      if (item.data?.id) {
-        await ticketsApi.update(item.data.id, { status: newStatus })
-      }
+      await ticketsApi.update(ticketId, { status: newStatus })
       setStatus(newStatus)
+      showMessage(`Status changed to ${newStatus}`)
       onUpdate?.()
     } catch (err) {
       console.error('Failed to update status:', err)
+      showMessage('Failed to update status', 'error')
     } finally {
       setLoading(false)
     }
@@ -26,36 +61,46 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return
+    if (!ticketId) {
+      showMessage('Cannot add note - ticket ID missing', 'error')
+      return
+    }
     setLoading(true)
     try {
-      if (item.data?.id) {
-        await ticketsApi.addNote(item.data.id, newNote)
-      }
+      await ticketsApi.addNote(ticketId, newNote)
       setNewNote('')
+      showMessage('Note added!')
+      // Refresh notes
+      await fetchTicketDetails()
       onUpdate?.()
     } catch (err) {
       console.error('Failed to add note:', err)
+      showMessage('Failed to add note', 'error')
     } finally {
       setLoading(false)
     }
   }
 
   const handleClose = async () => {
+    if (!ticketId) {
+      showMessage('Cannot close - ticket ID missing', 'error')
+      return
+    }
     setLoading(true)
     try {
-      if (item.data?.id) {
-        await ticketsApi.close(item.data.id)
-      }
+      await ticketsApi.close(ticketId)
       setStatus('closed')
+      showMessage('Ticket closed!')
       onUpdate?.()
     } catch (err) {
       console.error('Failed to close ticket:', err)
+      showMessage('Failed to close ticket', 'error')
     } finally {
       setLoading(false)
     }
   }
 
-  const time = new Date(item.time)
+  const time = new Date(item?.time || item?.scheduled_time || Date.now())
   const formattedTime = time.toLocaleString('en-US', {
     weekday: 'short',
     month: 'short',
@@ -65,18 +110,29 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
     hour12: true
   })
 
+  const guestName = item?.guestName || item?.guest_name
+  const roomNumber = item?.roomNumber || item?.room_number
+  const ticketType = item?.ticketType || item?.type
+
   return (
     <div className="detail-panel-overlay" onClick={onClose}>
       <div className="detail-panel" onClick={e => e.stopPropagation()}>
         <div className="panel-header">
           <div className="panel-title">
-            <span className="ticket-type">{item.ticketType?.toUpperCase() || 'TICKET'}</span>
-            <h3>{item.summary}</h3>
+            <span className="ticket-type">{ticketType?.toUpperCase().replace('_', ' ') || 'TICKET'}</span>
+            <h3>{item?.summary}</h3>
           </div>
           <button className="panel-close" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
+
+        {message && (
+          <div className={`panel-message ${message.type}`}>
+            {message.type === 'success' && <Check size={16} />}
+            {message.text}
+          </div>
+        )}
 
         <div className="panel-body">
           {/* Info Section */}
@@ -85,16 +141,16 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
               <Clock size={16} />
               <span>{formattedTime}</span>
             </div>
-            {item.guestName && (
+            {guestName && (
               <div className="info-row">
                 <User size={16} />
-                <span>{item.guestName}</span>
+                <span>{guestName}</span>
               </div>
             )}
-            {item.roomNumber && (
+            {roomNumber && (
               <div className="info-row">
                 <MapPin size={16} />
-                <span>Room {item.roomNumber}</span>
+                <span>Room {roomNumber}</span>
               </div>
             )}
           </div>
@@ -103,37 +159,25 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
           <div className="status-section">
             <label>Status</label>
             <div className="status-options">
-              {['open', 'pending', 'confirmed', 'closed'].map(s => (
+              {['open', 'pending', 'confirmed', 'in_progress', 'closed'].map(s => (
                 <button
                   key={s}
                   className={`status-option ${status === s ? 'active' : ''}`}
                   onClick={() => handleStatusChange(s)}
                   disabled={loading}
                 >
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                  {s.replace('_', ' ').charAt(0).toUpperCase() + s.replace('_', ' ').slice(1)}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="actions-section">
-            <button className="action-btn">
-              <Bell size={16} />
-              Set Alert
-            </button>
-            <button className="action-btn">
-              <Mail size={16} />
-              Email Guest
-            </button>
-          </div>
-
-          {/* Notes Section */}
+          {/* Notes Section - NO EMAIL SENT */}
           <div className="notes-section">
-            <label>Notes</label>
+            <label>Notes (Internal Only - No Email)</label>
             <div className="notes-list">
-              {item.data?.notes?.length > 0 ? (
-                item.data.notes.map(note => (
+              {notes.length > 0 ? (
+                notes.map(note => (
                   <div key={note.id} className="note-item">
                     <div className="note-meta">
                       <span className="note-author">{note.staff?.name || 'Staff'}</span>
@@ -152,7 +196,7 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
               <textarea
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
-                placeholder="Add a note..."
+                placeholder="Add an internal note (no email will be sent)..."
                 rows={2}
               />
               <button 
@@ -168,11 +212,17 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
 
         <div className="panel-footer">
           <button 
+            className="btn-secondary"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button 
             className="btn-danger"
             onClick={handleClose}
             disabled={status === 'closed' || loading}
           >
-            Close Ticket
+            {status === 'closed' ? 'Closed' : 'Close Ticket'}
           </button>
         </div>
       </div>
@@ -181,4 +231,3 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
 }
 
 export default TicketDetailPanel
-

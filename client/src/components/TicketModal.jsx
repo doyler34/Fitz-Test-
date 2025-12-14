@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
+import { X, Check } from 'lucide-react'
+import { tickets as ticketsApi } from '../services/api'
 import { useFilters } from '../hooks/useFilters'
 import './TicketModal.css'
 
 function TicketModal({ type = 'guest_request', onClose, onCreated }) {
-  const { addTicket } = useFilters()
+  const { refreshData } = useFilters()
   const [formData, setFormData] = useState({
     type,
+    department: type === 'internal_request' ? 'maintenance' : 'concierge',
     guest_name: '',
     room_number: '',
     summary: '',
@@ -19,22 +21,42 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData(prev => {
+      const updated = { ...prev, [name]: value }
+      // Auto-set department based on type
+      if (name === 'type') {
+        if (value === 'internal_request') {
+          updated.department = 'maintenance'
+        } else if (value === 'reminder') {
+          updated.department = 'front_desk'
+        } else {
+          updated.department = 'concierge'
+        }
+      }
+      return updated
+    })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!formData.summary.trim()) {
+      setError('Summary is required')
+      return
+    }
+    
     setLoading(true)
     setError(null)
 
     try {
-      await addTicket(formData)
+      await ticketsApi.create(formData)
       setSuccess(true)
+      refreshData?.()
       setTimeout(() => {
         onCreated?.()
         onClose()
-      }, 500)
+      }, 1000)
     } catch (err) {
+      console.error('Failed to create ticket:', err)
       setError(err.message || 'Failed to create request. Please try again.')
     } finally {
       setLoading(false)
@@ -56,7 +78,12 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
             {error && <div className="form-error">{error}</div>}
-            {success && <div className="form-success">Request created successfully!</div>}
+            {success && (
+              <div className="form-success">
+                <Check size={16} />
+                Request created successfully!
+              </div>
+            )}
 
             <div className="form-group">
               <label>Request Type</label>
@@ -68,6 +95,20 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
                 <option value="guest_request">Guest Request</option>
                 <option value="internal_request">Internal Request</option>
                 <option value="reminder">Reminder</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Department</label>
+              <select 
+                name="department" 
+                value={formData.department}
+                onChange={handleChange}
+              >
+                <option value="concierge">Concierge</option>
+                <option value="front_desk">Front Desk</option>
+                <option value="housekeeping">Housekeeping</option>
+                <option value="maintenance">Maintenance</option>
               </select>
             </div>
 
@@ -93,6 +134,19 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
                     placeholder="e.g. 101"
                   />
                 </div>
+              </div>
+            )}
+
+            {!isGuestRequest && (
+              <div className="form-group">
+                <label>Room Number (optional)</label>
+                <input
+                  type="text"
+                  name="room_number"
+                  value={formData.room_number}
+                  onChange={handleChange}
+                  placeholder="e.g. 101"
+                />
               </div>
             )}
 

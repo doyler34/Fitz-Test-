@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
-import { tickets as ticketsApi } from '../services/api'
+import { useFilters } from '../hooks/useFilters'
 import './TicketModal.css'
 
-// Local storage key for demo tickets
-const DEMO_TICKETS_KEY = 'fitz_companion_tickets'
-
 function TicketModal({ type = 'guest_request', onClose, onCreated }) {
+  const { addTicket } = useFilters()
   const [formData, setFormData] = useState({
     type,
     guest_name: '',
@@ -17,26 +15,11 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const saveDemoTicket = (ticketData) => {
-    // Save to localStorage for demo mode
-    const existing = JSON.parse(localStorage.getItem(DEMO_TICKETS_KEY) || '[]')
-    const newTicket = {
-      id: `demo-${Date.now()}`,
-      ...ticketData,
-      status: 'open',
-      hasAlert: ticketData.priority === 'high',
-      department: ticketData.type === 'internal_request' ? 'maintenance' : 'concierge',
-      created_at: new Date().toISOString()
-    }
-    existing.push(newTicket)
-    localStorage.setItem(DEMO_TICKETS_KEY, JSON.stringify(existing))
-    return newTicket
   }
 
   const handleSubmit = async (e) => {
@@ -45,19 +28,20 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
     setError(null)
 
     try {
-      await ticketsApi.create(formData)
-      onCreated?.()
+      await addTicket(formData)
+      setSuccess(true)
+      setTimeout(() => {
+        onCreated?.()
+        onClose()
+      }, 500)
     } catch (err) {
-      // API failed, save locally for demo
-      console.log('API unavailable, saving locally:', err.message)
-      saveDemoTicket(formData)
-      onCreated?.()
+      setError(err.message || 'Failed to create request. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  const isGuestRequest = type === 'guest_request'
+  const isGuestRequest = formData.type === 'guest_request'
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -72,33 +56,7 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
             {error && <div className="form-error">{error}</div>}
-
-            {isGuestRequest && (
-              <>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Guest Name</label>
-                    <input
-                      type="text"
-                      name="guest_name"
-                      value={formData.guest_name}
-                      onChange={handleChange}
-                      placeholder="Enter guest name"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Room Number</label>
-                    <input
-                      type="text"
-                      name="room_number"
-                      value={formData.room_number}
-                      onChange={handleChange}
-                      placeholder="e.g. 101"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
+            {success && <div className="form-success">Request created successfully!</div>}
 
             <div className="form-group">
               <label>Request Type</label>
@@ -112,6 +70,31 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
                 <option value="reminder">Reminder</option>
               </select>
             </div>
+
+            {isGuestRequest && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Guest Name</label>
+                  <input
+                    type="text"
+                    name="guest_name"
+                    value={formData.guest_name}
+                    onChange={handleChange}
+                    placeholder="Enter guest name"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Room Number</label>
+                  <input
+                    type="text"
+                    name="room_number"
+                    value={formData.room_number}
+                    onChange={handleChange}
+                    placeholder="e.g. 101"
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="form-group">
               <label>Summary *</label>
@@ -155,8 +138,8 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
             <button type="button" className="btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Request'}
+            <button type="submit" className="btn-primary" disabled={loading || success}>
+              {loading ? 'Creating...' : success ? 'Created!' : 'Create Request'}
             </button>
           </div>
         </form>
@@ -166,4 +149,3 @@ function TicketModal({ type = 'guest_request', onClose, onCreated }) {
 }
 
 export default TicketModal
-

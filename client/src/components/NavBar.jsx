@@ -6,7 +6,7 @@ import TicketModal from './TicketModal'
 import './NavBar.css'
 
 function NavBar() {
-  const { searchQuery, setSearchQuery, summary } = useFilters()
+  const { searchTerm, setSearchTerm, overviewCounts } = useFilters()
   const [showTicketModal, setShowTicketModal] = useState(false)
   const [ticketType, setTicketType] = useState('guest_request')
 
@@ -23,7 +23,7 @@ function NavBar() {
   }
 
   const handleSearch = (e) => {
-    setSearchQuery(e.target.value)
+    setSearchTerm(e.target.value)
   }
 
   return (
@@ -66,7 +66,7 @@ function NavBar() {
             <input 
               type="text" 
               placeholder="Search by name or room" 
-              value={searchQuery}
+              value={searchTerm || ''}
               onChange={handleSearch}
             />
           </div>
@@ -75,7 +75,7 @@ function NavBar() {
           </button>
           <button className="navbar-icon-btn has-badge" title="Notifications">
             <Bell size={18} />
-            {summary.alerts > 0 && <span className="badge">{summary.alerts}</span>}
+            {overviewCounts?.alerts > 0 && <span className="badge">{overviewCounts.alerts}</span>}
           </button>
           <button className="navbar-icon-btn" title="Settings">
             <Settings size={18} />
@@ -92,8 +92,6 @@ function NavBar() {
           onClose={() => setShowTicketModal(false)}
           onCreated={() => {
             setShowTicketModal(false)
-            // Trigger refresh by reloading page or via context
-            window.location.reload()
           }}
         />
       )}
@@ -102,4 +100,3 @@ function NavBar() {
 }
 
 export default NavBar
-

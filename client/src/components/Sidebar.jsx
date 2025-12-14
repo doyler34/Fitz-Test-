@@ -10,10 +10,10 @@ function Sidebar() {
     selectedDepartment, 
     setSelectedDepartment,
     departmentCounts,
-    summary
+    overviewCounts
   } = useFilters()
 
-  const [viewDate, setViewDate] = useState(new Date(selectedDate))
+  const [viewDate, setViewDate] = useState(new Date(selectedDate || new Date()))
   
   const today = new Date()
   const currentMonth = viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })
@@ -51,21 +51,25 @@ function Sidebar() {
   }
 
   const isSelected = (date) => {
-    return date.toDateString() === selectedDate.toDateString()
+    const selected = new Date(selectedDate)
+    return date.toDateString() === selected.toDateString()
   }
 
   const handleDateClick = (date) => {
-    setSelectedDate(date)
+    setSelectedDate(date.toISOString().slice(0, 10))
   }
 
-  const totalCount = departmentCounts.concierge + departmentCounts.front_desk + departmentCounts.housekeeping + departmentCounts.maintenance
+  const totalCount = (departmentCounts?.concierge || 0) + 
+                     (departmentCounts?.frontDesk || 0) + 
+                     (departmentCounts?.housekeeping || 0) + 
+                     (departmentCounts?.maintenance || 0)
 
   const departments = [
-    { id: 'all', name: 'All Departments', count: totalCount },
-    { id: 'concierge', name: 'Concierge', count: departmentCounts.concierge },
-    { id: 'front_desk', name: 'Front Desk', count: departmentCounts.front_desk },
-    { id: 'housekeeping', name: 'Housekeeping', count: departmentCounts.housekeeping },
-    { id: 'maintenance', name: 'Maintenance', count: departmentCounts.maintenance },
+    { id: 'All', name: 'All Departments', count: departmentCounts?.total || 0 },
+    { id: 'Concierge', name: 'Concierge', count: departmentCounts?.concierge || 0 },
+    { id: 'Front Desk', name: 'Front Desk', count: departmentCounts?.frontDesk || 0 },
+    { id: 'Housekeeping', name: 'Housekeeping', count: departmentCounts?.housekeeping || 0 },
+    { id: 'Maintenance', name: 'Maintenance', count: departmentCounts?.maintenance || 0 },
   ]
 
   return (
@@ -131,7 +135,7 @@ function Sidebar() {
               <Users size={16} />
             </div>
             <div className="summary-info">
-              <span className="summary-value">{summary.arrivals}</span>
+              <span className="summary-value">{overviewCounts?.arrivals || 0}</span>
               <span className="summary-label">Arrivals</span>
             </div>
           </div>
@@ -140,7 +144,7 @@ function Sidebar() {
               <Clock size={16} />
             </div>
             <div className="summary-info">
-              <span className="summary-value">{summary.pending}</span>
+              <span className="summary-value">{overviewCounts?.pending || 0}</span>
               <span className="summary-label">Pending</span>
             </div>
           </div>
@@ -149,7 +153,7 @@ function Sidebar() {
               <AlertCircle size={16} />
             </div>
             <div className="summary-info">
-              <span className="summary-value">{summary.alerts}</span>
+              <span className="summary-value">{overviewCounts?.alerts || 0}</span>
               <span className="summary-label">Alerts</span>
             </div>
           </div>
@@ -160,4 +164,3 @@ function Sidebar() {
 }
 
 export default Sidebar
-

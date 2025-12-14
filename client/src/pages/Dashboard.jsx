@@ -1,339 +1,75 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Filter, RefreshCw, FileText, X } from 'lucide-react'
 import TimelineRow from '../components/TimelineRow'
 import TicketDetailPanel from '../components/TicketDetailPanel'
 import { useFilters } from '../hooks/useFilters'
-import { timeline as timelineApi } from '../services/api'
 import './Dashboard.css'
-
-// Demo data for when API is not available
-const generateDemoData = () => {
-  const now = new Date()
-  return [
-    {
-      id: 'note-1',
-      type: 'note',
-      time: now.toISOString(),
-      guestName: null,
-      roomNumber: null,
-      summary: 'There is an incoming package from FEDEX that is high priority to be sent to the guest M...',
-      status: 'open',
-      priority: 'high',
-      hasAlert: false,
-      department: 'concierge'
-    },
-    {
-      id: 'note-2',
-      type: 'note',
-      time: now.toISOString(),
-      guestName: null,
-      roomNumber: null,
-      summary: 'Please check the tickets for King Lion Musical tomorrow, theater is asking for extra info...',
-      status: 'open',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'concierge'
-    },
-    {
-      id: 'ticket-1',
-      type: 'ticket',
-      ticketType: 'reminder',
-      time: new Date(now.setHours(6, 15)).toISOString(),
-      guestName: 'VAUGH, VIRGINIA',
-      roomNumber: '101',
-      summary: 'CAR SERVICE Call 555-027-68...',
-      status: 'open',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'concierge'
-    },
-    {
-      id: 'ticket-2',
-      type: 'ticket',
-      ticketType: 'reminder',
-      time: new Date(new Date().setHours(6, 30)).toISOString(),
-      guestName: 'GOMEZ, CHARLOTTE',
-      roomNumber: '712',
-      summary: 'WAKE UP CALL Guest asked for a Wake up Call at 6:30',
-      status: 'open',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'front_desk'
-    },
-    {
-      id: 'ticket-3',
-      type: 'ticket',
-      ticketType: 'guest_request',
-      time: new Date(new Date().setHours(8, 15)).toISOString(),
-      guestName: 'VAUGH, VIRGINIA',
-      roomNumber: '101',
-      summary: 'TOUR Historical Monuments Walking Tour',
-      status: 'pending',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'concierge'
-    },
-    {
-      id: 'ticket-4',
-      type: 'ticket',
-      ticketType: 'guest_request',
-      time: new Date(new Date().setHours(10, 0)).toISOString(),
-      guestName: 'LEE, DOROTHY',
-      roomNumber: '707',
-      summary: 'DELIVER Two towels and an extra pillow',
-      status: 'open',
-      priority: 'high',
-      hasAlert: true,
-      department: 'housekeeping'
-    },
-    {
-      id: 'ticket-5',
-      type: 'ticket',
-      ticketType: 'guest_request',
-      time: new Date(new Date().setHours(10, 30)).toISOString(),
-      guestName: 'BALLARD, JOHN',
-      roomNumber: '312',
-      summary: 'RESTAURANT RESERVATION The Breakfast, 5 peop...',
-      status: 'confirmed',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'concierge'
-    },
-    {
-      id: 'ticket-6',
-      type: 'ticket',
-      ticketType: 'guest_request',
-      time: new Date(new Date().setHours(12, 0)).toISOString(),
-      guestName: 'ARMSTRONG, MILT...',
-      roomNumber: '803',
-      summary: 'FLOWERS Guest asked for beautiful flowers on the b...',
-      status: 'open',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'concierge'
-    },
-    {
-      id: 'ticket-7',
-      type: 'ticket',
-      ticketType: 'guest_request',
-      time: new Date(new Date().setHours(12, 15)).toISOString(),
-      guestName: 'PARKS, FRANCIS',
-      roomNumber: '302',
-      summary: 'RESTAURANT RESERVATION Buddakan, 4 people, 0...',
-      status: 'closed',
-      priority: 'normal',
-      hasAlert: false,
-      department: 'concierge'
-    },
-    {
-      id: 'ticket-8',
-      type: 'ticket',
-      ticketType: 'internal_request',
-      time: new Date(new Date().setHours(12, 20)).toISOString(),
-      guestName: 'CRUZ, CHRIS',
-      roomNumber: '622',
-      summary: 'FIX Bathroom sink',
-      status: 'transferred',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'maintenance'
-    },
-    {
-      id: 'ticket-9',
-      type: 'ticket',
-      ticketType: 'guest_request',
-      time: new Date(new Date().setHours(12, 20)).toISOString(),
-      guestName: 'MUNOZ, ELSIE',
-      roomNumber: '610',
-      summary: 'RESTAURANT RESERVATION Braseiro, 5 people, 06...',
-      status: 'confirmed',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'concierge'
-    },
-    {
-      id: 'ticket-10',
-      type: 'ticket',
-      ticketType: 'guest_request',
-      time: new Date(new Date().setHours(13, 30)).toISOString(),
-      guestName: 'FOWLER, DERRICK',
-      roomNumber: '712',
-      summary: 'TRANSPORTATION Airport Shuttle, JFK Airport, 5 pe...',
-      status: 'open',
-      priority: 'normal',
-      hasAlert: true,
-      department: 'concierge'
-    },
-    {
-      id: 'ticket-11',
-      type: 'ticket',
-      ticketType: 'internal_request',
-      time: new Date(new Date().setHours(14, 0)).toISOString(),
-      guestName: null,
-      roomNumber: '405',
-      summary: 'CLEAN Deep cleaning requested after checkout',
-      status: 'pending',
-      priority: 'normal',
-      hasAlert: false,
-      department: 'housekeeping'
-    },
-    {
-      id: 'ticket-12',
-      type: 'ticket',
-      ticketType: 'internal_request',
-      time: new Date(new Date().setHours(15, 0)).toISOString(),
-      guestName: null,
-      roomNumber: '301',
-      summary: 'FIX AC not cooling properly',
-      status: 'open',
-      priority: 'high',
-      hasAlert: true,
-      department: 'maintenance'
-    }
-  ]
-}
 
 function Dashboard() {
   const { 
     selectedDate, 
     setSelectedDate,
-    selectedDepartment, 
-    statusFilter, 
-    setStatusFilter,
-    searchQuery,
-    setSummary,
-    setDepartmentCounts
+    selectedDepartment,
+    setSelectedDepartment,
+    selectedStatus,
+    setSelectedStatus,
+    searchTerm,
+    filteredTickets,
+    loading,
+    refreshData,
+    clearFilters
   } = useFilters()
 
-  const [allItems, setAllItems] = useState([])
-  const [loading, setLoading] = useState(true)
   const [selectedItem, setSelectedItem] = useState(null)
-  const [activeFilters, setActiveFilters] = useState([])
 
-  useEffect(() => {
-    loadTimeline()
-  }, [selectedDate])
-
-  useEffect(() => {
-    // Update active filters display
-    const filters = []
-    if (selectedDate.toDateString() === new Date().toDateString()) {
-      filters.push({ key: 'date', label: 'Date TODAY' })
-    } else {
-      filters.push({ key: 'date', label: `Date ${selectedDate.toLocaleDateString()}` })
-    }
-    if (selectedDepartment && selectedDepartment !== 'all') {
-      const deptNames = {
-        concierge: 'Concierge',
-        front_desk: 'Front Desk',
-        housekeeping: 'Housekeeping',
-        maintenance: 'Maintenance'
-      }
-      filters.push({ key: 'dept', label: `Dept: ${deptNames[selectedDepartment] || selectedDepartment}` })
-    }
-    if (statusFilter !== 'all') {
-      filters.push({ key: 'status', label: `Status: ${statusFilter}` })
-    }
-    setActiveFilters(filters)
-  }, [selectedDate, selectedDepartment, statusFilter])
-
-  useEffect(() => {
-    // Calculate department counts and summary from items
-    const counts = {
-      concierge: 0,
-      front_desk: 0,
-      housekeeping: 0,
-      maintenance: 0
-    }
-    let pending = 0
-    let alerts = 0
-    let arrivals = 4 // Demo value
-
-    allItems.forEach(item => {
-      if (item.department) {
-        counts[item.department] = (counts[item.department] || 0) + 1
-      }
-      if (item.status === 'pending') pending++
-      if (item.hasAlert && item.status !== 'closed') alerts++
-    })
-
-    setDepartmentCounts(counts)
-    setSummary({ arrivals, pending, alerts })
-  }, [allItems, setDepartmentCounts, setSummary])
-
-  const loadTimeline = async () => {
-    setLoading(true)
-    try {
-      const dateStr = selectedDate.toISOString().split('T')[0]
-      const data = await timelineApi.get(dateStr, statusFilter)
-      setAllItems(data.items || [])
-    } catch (err) {
-      console.log('Using demo data:', err.message)
-      setAllItems(generateDemoData())
-    } finally {
-      setLoading(false)
-    }
+  // Build active filters list
+  const activeFilters = []
+  const today = new Date().toISOString().slice(0, 10)
+  
+  if (selectedDate === today) {
+    activeFilters.push({ key: 'date', label: 'Date TODAY' })
+  } else if (selectedDate) {
+    activeFilters.push({ key: 'date', label: `Date ${selectedDate}` })
+  }
+  if (selectedDepartment && selectedDepartment !== 'All') {
+    activeFilters.push({ key: 'dept', label: `Dept: ${selectedDepartment}` })
+  }
+  if (selectedStatus && selectedStatus !== 'All') {
+    activeFilters.push({ key: 'status', label: `Status: ${selectedStatus}` })
   }
 
-  // Filter items based on all active filters
-  const filteredItems = allItems.filter(item => {
-    // Department filter
-    if (selectedDepartment !== 'all' && item.department !== selectedDepartment) {
-      return false
+  const removeFilter = (filterKey) => {
+    if (filterKey === 'date') {
+      setSelectedDate(today)
+    } else if (filterKey === 'status') {
+      setSelectedStatus('All')
+    } else if (filterKey === 'dept') {
+      setSelectedDepartment('All')
     }
-    // Status filter
-    if (statusFilter !== 'all' && item.status !== statusFilter) {
-      return false
-    }
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      const matchesName = item.guestName?.toLowerCase().includes(query)
-      const matchesRoom = item.roomNumber?.includes(query)
-      const matchesSummary = item.summary?.toLowerCase().includes(query)
-      if (!matchesName && !matchesRoom && !matchesSummary) {
-        return false
-      }
-    }
-    return true
-  })
+  }
 
   const handleItemClick = (item) => {
     setSelectedItem(item)
   }
 
-  const removeFilter = (filterKey) => {
-    if (filterKey === 'date') {
-      setSelectedDate(new Date())
-    } else if (filterKey === 'status') {
-      setStatusFilter('all')
-    }
-  }
-
-  const clearAllFilters = () => {
-    setSelectedDate(new Date())
-    setStatusFilter('all')
-  }
-
   // Group items by hour for timeline display
-  const groupedItems = filteredItems.reduce((acc, item) => {
-    const hour = new Date(item.time).getHours()
+  const groupedItems = (filteredTickets || []).reduce((acc, item) => {
+    const time = item.time || item.scheduled_time
+    if (!time) return acc
+    const hour = new Date(time).getHours()
     const key = `${hour.toString().padStart(2, '0')}:00`
     if (!acc[key]) acc[key] = []
     acc[key].push(item)
     return acc
   }, {})
 
-  // Get relevant hours
-  const currentHour = new Date().getHours()
+  // Get hours that have items
   const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`)
+  const currentHour = new Date().getHours()
   const relevantHours = hours.filter(h => {
     const hour = parseInt(h)
-    return groupedItems[h]?.length > 0 || (hour >= currentHour - 1 && hour <= currentHour + 12)
+    return groupedItems[h]?.length > 0 || (hour >= 6 && hour <= 22)
   })
-
-  // Separate notes from regular items
-  const noteItems = filteredItems.filter(i => i.type === 'note')
 
   const formatHour = (hour) => {
     const h = parseInt(hour)
@@ -343,28 +79,34 @@ function Dashboard() {
     return `${h - 12}pm`
   }
 
+  // Separate notes from regular items
+  const noteItems = (filteredTickets || []).filter(i => i.type === 'note' || i.type === 'internal_request')
+
   return (
     <div className="dashboard">
       {/* Filter Bar */}
       <div className="dashboard-filters">
         <div className="filter-left">
           <button 
-            className={`filter-btn ${selectedDate.toDateString() === new Date().toDateString() ? 'active' : ''}`}
-            onClick={() => setSelectedDate(new Date())}
+            className={`filter-btn ${selectedDate === today ? 'active' : ''}`}
+            onClick={() => setSelectedDate(today)}
           >
             Today
           </button>
-          <button className="filter-btn">
+          <button 
+            className="filter-btn"
+            onClick={() => setSelectedDate('')}
+          >
             All Time
           </button>
           <input 
             type="date" 
             className="filter-date"
-            value={selectedDate.toISOString().split('T')[0]}
-            onChange={(e) => setSelectedDate(new Date(e.target.value))}
+            value={selectedDate || ''}
+            onChange={(e) => setSelectedDate(e.target.value)}
           />
           <div className="filter-search">
-            <input type="text" placeholder="Search Tickets" />
+            <input type="text" placeholder="Search Tickets" value={searchTerm || ''} readOnly />
           </div>
         </div>
         <div className="filter-right">
@@ -374,25 +116,25 @@ function Dashboard() {
           </div>
           <div className="status-filters">
             <button 
-              className={`status-filter ${statusFilter === 'open' ? 'active' : ''}`}
-              onClick={() => setStatusFilter(statusFilter === 'open' ? 'all' : 'open')}
+              className={`status-filter ${selectedStatus === 'Open' ? 'active' : ''}`}
+              onClick={() => setSelectedStatus(selectedStatus === 'Open' ? 'All' : 'Open')}
             >
               Open
             </button>
             <button 
-              className={`status-filter ${statusFilter === 'closed' ? 'active' : ''}`}
-              onClick={() => setStatusFilter(statusFilter === 'closed' ? 'all' : 'closed')}
+              className={`status-filter ${selectedStatus === 'Closed' ? 'active' : ''}`}
+              onClick={() => setSelectedStatus(selectedStatus === 'Closed' ? 'All' : 'Closed')}
             >
               Closed
             </button>
             <button 
-              className={`status-filter all ${statusFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('all')}
+              className={`status-filter all ${selectedStatus === 'All' ? 'active' : ''}`}
+              onClick={() => setSelectedStatus('All')}
             >
               All
             </button>
           </div>
-          <button className="refresh-btn" onClick={loadTimeline} title="Refresh">
+          <button className="refresh-btn" onClick={refreshData} title="Refresh">
             <RefreshCw size={16} className={loading ? 'spinning' : ''} />
           </button>
         </div>
@@ -408,14 +150,16 @@ function Dashboard() {
               <button onClick={() => removeFilter(f.key)}>×</button>
             </span>
           ))}
-          <button className="clear-filters" onClick={clearAllFilters}>Clear</button>
+          {activeFilters.length > 0 && (
+            <button className="clear-filters" onClick={clearFilters}>Clear</button>
+          )}
         </div>
         <div className="date-info">
-          {selectedDate.toLocaleDateString('en-US', { 
+          {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { 
             month: 'short', 
             day: 'numeric', 
             year: 'numeric' 
-          })}
+          }) : 'All Dates'}
         </div>
         <div className="column-headers">
           <span>FOR</span>
@@ -429,7 +173,7 @@ function Dashboard() {
       {/* Notes Section */}
       {noteItems.length > 0 && (
         <div className="notes-section">
-          {noteItems.map(note => (
+          {noteItems.slice(0, 2).map(note => (
             <div key={note.id} className="note-row" onClick={() => handleItemClick(note)}>
               <div className="note-icon">
                 <FileText size={16} />
@@ -437,11 +181,11 @@ function Dashboard() {
               <div className="note-label">NOTES</div>
               <div className="note-content">{note.summary}</div>
               <div className="note-status">
-                <button className={`status-badge status-${note.status}`}>
-                  {note.status.toUpperCase()}
+                <button className={`status-badge status-${(note.status || 'open').toLowerCase()}`}>
+                  {(note.status || 'OPEN').toUpperCase()}
                 </button>
               </div>
-              {note.hasAlert && <div className="note-alert">ROLL</div>}
+              {note.alerts?.length > 0 && <div className="note-alert">ROLL</div>}
             </div>
           ))}
         </div>
@@ -449,31 +193,37 @@ function Dashboard() {
 
       {/* Timeline */}
       <div className="timeline">
-        {relevantHours.map(hour => (
-          <div key={hour} className="timeline-hour">
-            <div className="hour-label">{formatHour(hour)}</div>
-            <div className="hour-items">
-              {(groupedItems[hour] || [])
-                .filter(item => item.type !== 'note')
-                .map(item => (
-                  <TimelineRow 
-                    key={item.id} 
-                    item={item} 
-                    onClick={handleItemClick}
-                  />
-                ))
-              }
+        {loading ? (
+          <div className="loading-message">Loading...</div>
+        ) : relevantHours.length === 0 ? (
+          <div className="empty-message">No tickets for selected filters</div>
+        ) : (
+          relevantHours.map(hour => (
+            <div key={hour} className="timeline-hour">
+              <div className="hour-label">{formatHour(hour)}</div>
+              <div className="hour-items">
+                {(groupedItems[hour] || [])
+                  .filter(item => item.type !== 'note')
+                  .map(item => (
+                    <TimelineRow 
+                      key={item.id} 
+                      item={item} 
+                      onClick={handleItemClick}
+                    />
+                  ))
+                }
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Footer Stats */}
       <div className="dashboard-footer">
-        <div className="total-count">TOTAL TICKETS: {filteredItems.length}</div>
+        <div className="total-count">TOTAL TICKETS: {filteredTickets?.length || 0}</div>
         <div className="pagination">
           <button>&lt;</button>
-          <span>1 / {Math.ceil(filteredItems.length / 10) || 1}</span>
+          <span>1 / {Math.ceil((filteredTickets?.length || 0) / 10) || 1}</span>
           <button>&gt;</button>
         </div>
       </div>
@@ -483,7 +233,7 @@ function Dashboard() {
         <TicketDetailPanel 
           item={selectedItem} 
           onClose={() => setSelectedItem(null)}
-          onUpdate={loadTimeline}
+          onUpdate={refreshData}
         />
       )}
     </div>

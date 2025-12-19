@@ -17,94 +17,94 @@
 /* Row status backgrounds - ALICE-style color coding */
 /* Urgent/High Priority: Red background */
 .timeline-row.row-urgent {
-  background: #fee2e2;
+  background: #fecaca;
   border-left: 4px solid #dc2626;
 }
 
 .timeline-row.row-urgent:hover {
-  background: #fecaca;
+  background: #fca5a5;
 }
 
-/* Open: Red/light red background */
+/* Open: Blue background */
 .timeline-row.row-open {
-  background: #fee2e2;
-  border-left: 4px solid #ef4444;
+  background: #dbeafe;
+  border-left: 4px solid #3b82f6;
 }
 
 .timeline-row.row-open:hover {
-  background: #fecaca;
+  background: #bfdbfe;
 }
 
 /* Pending: Orange/Yellow background */
 .timeline-row.row-pending {
-  background: #fef3c7;
+  background: #fde68a;
   border-left: 4px solid #f59e0b;
 }
 
 .timeline-row.row-pending:hover {
-  background: #fde68a;
+  background: #fcd34d;
 }
 
 /* Confirmed: Green background */
 .timeline-row.row-confirmed {
-  background: #dcfce7;
+  background: #bbf7d0;
   border-left: 4px solid #22c55e;
 }
 
 .timeline-row.row-confirmed:hover {
-  background: #bbf7d0;
+  background: #86efac;
 }
 
-/* Closed: Yellow/Light background */
+/* Closed: Greyed out */
 .timeline-row.row-closed {
-  background: #fef9c3;
-  border-left: 4px solid #eab308;
+  background: #f3f4f6;
+  border-left: 4px solid #9ca3af;
   opacity: 0.9;
 }
 
 .timeline-row.row-closed:hover {
-  background: #fef08a;
+  background: #e5e7eb;
   opacity: 1;
 }
 
 /* Transferred: Yellow background */
 .timeline-row.row-transferred {
-  background: #fef9c3;
+  background: #fef08a;
   border-left: 4px solid #eab308;
 }
 
 .timeline-row.row-transferred:hover {
-  background: #fef08a;
+  background: #fde047;
 }
 
 /* In Progress: Blue background */
 .timeline-row.row-in-progress {
-  background: #dbeafe;
+  background: #bfdbfe;
   border-left: 4px solid #3b82f6;
 }
 
 .timeline-row.row-in-progress:hover {
-  background: #bfdbfe;
+  background: #93c5fd;
 }
 
 /* Ordered: Blue background */
 .timeline-row.row-ordered {
-  background: #dbeafe;
+  background: #bfdbfe;
   border-left: 4px solid #2563eb;
 }
 
 .timeline-row.row-ordered:hover {
-  background: #bfdbfe;
+  background: #93c5fd;
 }
 
 /* Delayed: Red background with stronger border */
 .timeline-row.row-delayed {
-  background: #fee2e2;
+  background: #fecaca;
   border-left: 4px solid #dc2626;
 }
 
 .timeline-row.row-delayed:hover {
-  background: #fecaca;
+  background: #fca5a5;
 }
 
 /* Columns */

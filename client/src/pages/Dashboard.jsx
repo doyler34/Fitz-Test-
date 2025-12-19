@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Filter, RefreshCw, FileText, X } from 'lucide-react'
+import { Filter, RefreshCw, FileText, X, Pencil } from 'lucide-react'
 import TimelineRow from '../components/TimelineRow'
 import TicketDetailPanel from '../components/TicketDetailPanel'
 import StatusBadge from '../components/StatusBadge'
+import NoteModal from '../components/NoteModal'
 import { useFilters } from '../hooks/useFilters'
 import './Dashboard.css'
 
@@ -14,6 +15,8 @@ function Dashboard() {
     setSelectedDepartment,
     selectedStatus,
     setSelectedStatus,
+    selectedType,
+    setSelectedType,
     searchTerm,
     filteredTickets,
     loading,
@@ -22,6 +25,8 @@ function Dashboard() {
   } = useFilters()
 
   const [selectedItem, setSelectedItem] = useState(null)
+  const [showNoteModal, setShowNoteModal] = useState(false)
+  const [editingNote, setEditingNote] = useState(null)
 
   // Build active filters list
   const activeFilters = []
@@ -38,6 +43,12 @@ function Dashboard() {
   if (selectedStatus && selectedStatus !== 'All') {
     activeFilters.push({ key: 'status', label: `Status: ${selectedStatus}` })
   }
+  if (selectedType && selectedType !== 'All') {
+    activeFilters.push({ 
+      key: 'type', 
+      label: selectedType === 'internal_request' ? 'Internal' : 'Guest' 
+    })
+  }
 
   const removeFilter = (filterKey) => {
     if (filterKey === 'date') {
@@ -46,7 +57,14 @@ function Dashboard() {
       setSelectedStatus('All')
     } else if (filterKey === 'dept') {
       setSelectedDepartment('All')
+    } else if (filterKey === 'type') {
+      setSelectedType('All')
     }
+  }
+
+  const toggleType = (typeKey) => {
+    const value = typeKey === 'guest' ? 'guest_request' : 'internal_request'
+    setSelectedType(selectedType === value ? 'All' : value)
   }
 
   const handleItemClick = (item) => {
@@ -111,6 +129,14 @@ function Dashboard() {
           </div>
         </div>
         <div className="filter-right">
+          <button 
+            className="notes-btn"
+            onClick={() => setShowNoteModal(true)}
+            title="Add Note"
+          >
+            <FileText size={16} />
+            Notes
+          </button>
           <div className="filter-dropdown">
             <Filter size={14} />
             Filters
@@ -155,6 +181,20 @@ function Dashboard() {
             <button className="clear-filters" onClick={clearFilters}>Clear</button>
           )}
         </div>
+        <div className="type-toggle-group">
+          <button
+            className={`type-toggle ${selectedType === 'guest_request' ? 'active' : ''}`}
+            onClick={() => toggleType('guest')}
+          >
+            Guest
+          </button>
+          <button
+            className={`type-toggle ${selectedType === 'internal_request' ? 'active' : ''}`}
+            onClick={() => toggleType('internal')}
+          >
+            Internal
+          </button>
+        </div>
         <div className="date-info">
           {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { 
             month: 'short', 
@@ -175,18 +215,23 @@ function Dashboard() {
       {noteItems.length > 0 && (
         <div className="notes-section">
           {noteItems.slice(0, 2).map(note => (
-            <div key={note.id} className="note-row" onClick={() => handleItemClick(note)}>
+            <div key={note.id} className="note-row">
               <div className="note-icon">
                 <FileText size={16} />
               </div>
               <div className="note-label">NOTES</div>
-              <div className="note-content">{note.summary}</div>
-              <div className="note-status">
-                <button className={`status-badge status-${(note.status || 'open').toLowerCase()}`}>
-                  {(note.status || 'OPEN').toUpperCase()}
-                </button>
-              </div>
-              {note.alerts?.length > 0 && <div className="note-alert">ROLL</div>}
+              <div className="note-content">{note.summary || note.content}</div>
+              <button 
+                className="note-edit-btn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setEditingNote(note)
+                  setShowNoteModal(true)
+                }}
+                title="Edit Note"
+              >
+                <Pencil size={16} />
+              </button>
             </div>
           ))}
         </div>
@@ -292,6 +337,22 @@ function Dashboard() {
           item={selectedItem} 
           onClose={() => setSelectedItem(null)}
           onUpdate={refreshData}
+        />
+      )}
+
+      {/* Note Modal */}
+      {showNoteModal && (
+        <NoteModal
+          note={editingNote}
+          onClose={() => {
+            setShowNoteModal(false)
+            setEditingNote(null)
+          }}
+          onCreated={() => {
+            setShowNoteModal(false)
+            setEditingNote(null)
+            refreshData()
+          }}
         />
       )}
     </div>

@@ -83,13 +83,13 @@ function Tickets() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [typeFilter, setTypeFilter] = useState('all')
+  const [activeTab, setActiveTab] = useState('guest') // 'guest' or 'internal'
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   useEffect(() => {
     loadTickets()
-  }, [statusFilter, typeFilter])
+  }, [statusFilter, activeTab])
 
   // Sync with global search
   useEffect(() => {
@@ -101,7 +101,8 @@ function Tickets() {
     try {
       const filters = {}
       if (statusFilter !== 'all') filters.status = statusFilter
-      if (typeFilter !== 'all') filters.type = typeFilter
+      // Filter by tab: guest_request for 'guest' tab, internal_request for 'internal' tab
+      filters.type = activeTab === 'guest' ? 'guest_request' : 'internal_request'
       
       const data = await ticketsApi.list(filters)
       setTickets(data)
@@ -111,9 +112,10 @@ function Tickets() {
       if (statusFilter !== 'all') {
         filtered = filtered.filter(t => t.status === statusFilter)
       }
-      if (typeFilter !== 'all') {
-        filtered = filtered.filter(t => t.type === typeFilter)
-      }
+      // Filter by tab
+      filtered = filtered.filter(t => 
+        activeTab === 'guest' ? t.type === 'guest_request' : t.type === 'internal_request'
+      )
       setTickets(filtered)
     } finally {
       setLoading(false)
@@ -176,6 +178,22 @@ function Tickets() {
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="tickets-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'guest' ? 'active' : ''}`}
+          onClick={() => setActiveTab('guest')}
+        >
+          Guest Requests
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'internal' ? 'active' : ''}`}
+          onClick={() => setActiveTab('internal')}
+        >
+          Internal Requests
+        </button>
+      </div>
+
       {/* Filters */}
       <div className="tickets-filters">
         <div className="search-box">
@@ -200,61 +218,63 @@ function Tickets() {
           </select>
         </div>
 
-        <div className="filter-group">
-          <label>Type:</label>
-          <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            <option value="all">All Types</option>
-            <option value="guest_request">Guest Request</option>
-            <option value="internal_request">Internal</option>
-            <option value="reminder">Reminder</option>
-          </select>
-        </div>
-
         <button className="refresh-btn" onClick={loadTickets}>
           <RefreshCw size={16} className={loading ? 'spinning' : ''} />
         </button>
       </div>
 
-      {/* Tickets Table */}
-      <div className="tickets-table">
-        <div className="table-header">
-          <span>Time</span>
-          <span>Type</span>
-          <span>Guest</span>
-          <span>Room</span>
-          <span>Summary</span>
-          <span>Status</span>
-          <span>Priority</span>
-        </div>
-        <div className="table-body">
-          {loading ? (
-            <div className="loading-state">Loading tickets...</div>
-          ) : filteredTickets.length === 0 ? (
-            <div className="empty-state">No tickets found</div>
-          ) : (
-            filteredTickets.map(ticket => (
+      {/* Tickets List - card style like dashboard */}
+      <div className="tickets-list">
+        {loading ? (
+          <div className="loading-state">Loading tickets...</div>
+        ) : filteredTickets.length === 0 ? (
+          <div className="empty-state">No tickets found</div>
+        ) : (
+          filteredTickets.map(ticket => {
+            const isHigh = ticket.priority === 'high' || ticket.priority === 'urgent'
+            const status = (ticket.status || '').toLowerCase()
+
+            const cardClasses = ['ticket-card']
+            if (isHigh && status !== 'closed') cardClasses.push('ticket-card-urgent')
+            if (!isHigh && status === 'open') cardClasses.push('ticket-card-open')
+            if (status === 'confirmed') cardClasses.push('ticket-card-confirmed')
+            if (status === 'closed') cardClasses.push('ticket-card-closed')
+
+            return (
               <div 
                 key={ticket.id} 
-                className={`table-row ${ticket.priority === 'high' ? 'high-priority' : ''}`}
+                className={cardClasses.join(' ')}
                 onClick={() => handleTicketClick(ticket)}
               >
-                <span className="col-time">{formatTime(ticket.scheduled_time)}</span>
-                <span className="col-type">
-                  <span className="type-badge">{getTypeLabel(ticket.type)}</span>
-                </span>
-                <span className="col-guest">{ticket.guest_name || '—'}</span>
-                <span className="col-room">{ticket.room_number || '—'}</span>
-                <span className="col-summary">{ticket.summary}</span>
-                <span className="col-status">
-                  <StatusBadge status={ticket.status} />
-                </span>
-                <span className={`col-priority priority-${ticket.priority}`}>
-                  {ticket.priority}
-                </span>
+                <div className="ticket-card-time">{formatTime(ticket.scheduled_time)}</div>
+                <div className="ticket-card-body">
+                  <div className="ticket-card-meta">
+                    <div className="ticket-card-type-room">
+                      <span className="ticket-card-type">
+                        {getTypeLabel(ticket.type)}
+                      </span>
+                      {ticket.room_number && (
+                        <span className="ticket-card-room">• Room {ticket.room_number}</span>
+                      )}
+                    </div>
+                    {ticket.guest_name && (
+                      <div className="ticket-card-guest">{ticket.guest_name}</div>
+                    )}
+                    <div className="ticket-card-summary">{ticket.summary}</div>
+                    {isHigh && (
+                      <div className="ticket-card-priority-pill">
+                        HIGH Priority
+                      </div>
+                    )}
+                  </div>
+                  <div className="ticket-card-status">
+                    <StatusBadge status={ticket.status} />
+                  </div>
+                </div>
               </div>
-            ))
-          )}
-        </div>
+            )
+          })
+        )}
       </div>
 
       {/* Stats Footer */}

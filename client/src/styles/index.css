@@ -20,8 +20,9 @@
   --color-accent-light: #e0e7ff;
   
   /* Status Colors - More muted, professional */
-  --color-status-open: #fde2e2;
-  --color-status-open-text: #b91c1c;
+  /* Open = blue instead of red */
+  --color-status-open: #dbeafe;
+  --color-status-open-text: #1d4ed8;
   --color-status-pending: #fef3c7;
   --color-status-pending-text: #92400e;
   --color-status-confirmed: #d1fae5;

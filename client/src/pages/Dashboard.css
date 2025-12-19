@@ -71,6 +71,25 @@
   gap: var(--space-md);
 }
 
+.notes-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notes-btn:hover {
+  background: var(--color-primary-hover);
+}
+
 .filter-dropdown {
   display: flex;
   align-items: center;
@@ -199,6 +218,36 @@
   color: var(--color-text);
 }
 
+/* Guest / Internal toggles under Filtered By */
+.type-toggle-group {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.type-toggle {
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-white);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.type-toggle:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.type-toggle.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
 .column-headers {
   display: grid;
   grid-template-columns: 150px 60px 1fr 90px 70px;
@@ -223,7 +272,6 @@
   padding: var(--space-md) var(--space-lg);
   background: var(--color-bg-white);
   border-bottom: 1px solid var(--color-border-light);
-  cursor: pointer;
   transition: background 0.15s ease;
 }
 
@@ -256,28 +304,25 @@
   text-overflow: ellipsis;
 }
 
-.note-status .status-badge {
-  padding: 4px 12px;
-  border: 1px solid;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+.note-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
   cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
 }
 
-.note-status .status-open {
-  background: var(--color-status-open);
-  color: var(--color-status-open-text);
-  border-color: var(--color-status-open-text);
-}
-
-.note-alert {
-  padding: 4px 8px;
-  background: #1e3a5f;
-  color: white;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  border-radius: var(--radius-sm);
+.note-edit-btn:hover {
+  background: var(--color-bg);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* Timeline */
@@ -447,43 +492,43 @@
 
   /* Status-based color coding for mobile cards (ALICE-style) */
   .mobile-ticket-card.ticket-urgent {
-    background: #fee2e2;
+    background: #fecaca;
     border-left: 4px solid #dc2626;
   }
 
   .mobile-ticket-card.ticket-open {
-    background: #fee2e2;
-    border-left: 4px solid #ef4444;
-  }
-
-  .mobile-ticket-card.ticket-pending {
-    background: #fef3c7;
-    border-left: 4px solid #f59e0b;
-  }
-
-  .mobile-ticket-card.ticket-confirmed {
-    background: #dcfce7;
-    border-left: 4px solid #22c55e;
-  }
-
-  .mobile-ticket-card.ticket-closed {
-    background: #fef9c3;
-    border-left: 4px solid #eab308;
-    opacity: 0.9;
-  }
-
-  .mobile-ticket-card.ticket-transferred {
-    background: #fef9c3;
-    border-left: 4px solid #eab308;
-  }
-
-  .mobile-ticket-card.ticket-in-progress {
     background: #dbeafe;
     border-left: 4px solid #3b82f6;
   }
 
+  .mobile-ticket-card.ticket-pending {
+    background: #fde68a;
+    border-left: 4px solid #f59e0b;
+  }
+
+  .mobile-ticket-card.ticket-confirmed {
+    background: #bbf7d0;
+    border-left: 4px solid #22c55e;
+  }
+
+  .mobile-ticket-card.ticket-closed {
+    background: #f3f4f6;
+    border-left: 4px solid #9ca3af;
+    opacity: 0.9;
+  }
+
+  .mobile-ticket-card.ticket-transferred {
+    background: #fef08a;
+    border-left: 4px solid #eab308;
+  }
+
+  .mobile-ticket-card.ticket-in-progress {
+    background: #bfdbfe;
+    border-left: 4px solid #3b82f6;
+  }
+
   .mobile-ticket-card.ticket-ordered {
-    background: #dbeafe;
+    background: #bfdbfe;
     border-left: 4px solid #2563eb;
   }
 

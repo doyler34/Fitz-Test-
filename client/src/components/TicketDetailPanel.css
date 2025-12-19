@@ -83,25 +83,55 @@
   padding: var(--space-lg);
 }
 
-/* Info Section */
+/* Info Section - ALICE-style layout */
 .info-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   padding-bottom: var(--space-lg);
   border-bottom: 1px solid var(--color-border);
   margin-bottom: var(--space-lg);
 }
 
-.info-row {
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.field-value {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
 
-.info-row svg {
+.field-value svg {
+  color: var(--color-text-muted);
+}
+
+.field-value.main-value {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.compact-status .field-value {
+  justify-content: flex-start;
+}
+
+.auto-close-timer {
+  margin-left: var(--space-sm);
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
@@ -293,49 +323,44 @@
   color: #dc2626;
 }
 
-/* Footer */
-.panel-footer {
+/* Footer - mobile-style action bar */
+.panel-footer.action-footer {
   display: flex;
-  gap: var(--space-md);
-  padding: var(--space-lg);
+  padding: 0;
   border-top: 1px solid var(--color-border);
 }
 
-.btn-secondary {
+.btn-footer {
   flex: 1;
-  padding: var(--space-sm) var(--space-lg);
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.btn-secondary:hover {
-  background: var(--color-bg);
-}
-
-.btn-danger {
-  flex: 1;
-  padding: var(--space-sm) var(--space-lg);
-  background: #dc2626;
+  padding: var(--space-md) 0;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: white;
+  font-size: var(--font-size-md);
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
 }
 
-.btn-danger:hover {
-  background: #b91c1c;
+.btn-footer-accept {
+  background: #a7f3d0;
+  color: #064e3b;
 }
 
-.btn-danger:disabled {
-  opacity: 0.6;
+.btn-footer-start {
+  background: #4ade80;
+  color: #064e3b;
+}
+
+.btn-footer-close {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-footer:hover {
+  opacity: 0.9;
+}
+
+.btn-footer:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 

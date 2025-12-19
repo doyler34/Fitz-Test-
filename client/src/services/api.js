@@ -58,6 +58,11 @@ export const timeline = {
     request('/api/timeline/notes', {
       method: 'POST',
       body: JSON.stringify({ content, priority })
+    }),
+  updateNote: (id, content, priority) =>
+    request(`/api/timeline/notes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ content, priority })
     })
 }
 

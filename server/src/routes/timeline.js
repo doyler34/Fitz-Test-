@@ -174,6 +174,34 @@ router.post('/notes', async (req, res) => {
   }
 })
 
+// PUT /api/timeline/notes/:id - Update internal note
+router.put('/notes/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const { content, priority } = req.body
+
+    if (!content) {
+      return res.status(400).json({ error: 'Note content required' })
+    }
+
+    const { data, error } = await supabase
+      .from('internal_notes')
+      .update({
+        content,
+        priority: priority || 'normal'
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    res.json(data)
+  } catch (err) {
+    console.error('Update note error:', err)
+    res.status(500).json({ error: 'Failed to update note' })
+  }
+})
+
 export default router
 
 

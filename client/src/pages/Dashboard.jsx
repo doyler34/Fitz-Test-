@@ -240,8 +240,14 @@ function Dashboard() {
                   key={item.id} 
                   className={[
                     'mobile-ticket-card',
-                    (item.priority === 'high' || item.priority === 'urgent') ? 'ticket-urgent' : '',
-                    (item.status === 'closed' || item.status === 'confirmed' || item.status === 'done') ? 'ticket-done' : ''
+                    (item.priority === 'high' || item.priority === 'urgent') ? 'ticket-urgent' : 
+                    item.status === 'open' ? 'ticket-open' :
+                    item.status === 'pending' ? 'ticket-pending' :
+                    item.status === 'confirmed' ? 'ticket-confirmed' :
+                    item.status === 'closed' ? 'ticket-closed' :
+                    item.status === 'transferred' ? 'ticket-transferred' :
+                    item.status === 'in_progress' ? 'ticket-in-progress' :
+                    item.status === 'ordered' || item.status === 'ord' ? 'ticket-ordered' : ''
                   ].filter(Boolean).join(' ')}
                   onClick={() => handleItemClick(item)}
                 >

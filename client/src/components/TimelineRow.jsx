@@ -12,22 +12,22 @@ function TimelineRow({ item, onClick }) {
 
   const getRowClass = () => {
     let classes = ['timeline-row']
-    if (item.status === 'open') classes.push('row-open')
-    if (item.status === 'pending') classes.push('row-pending')
-    if (item.status === 'confirmed') classes.push('row-confirmed')
-    if (item.status === 'closed') classes.push('row-closed')
-    if (item.status === 'transferred') classes.push('row-transferred')
-    if (item.status === 'delayed') classes.push('row-delayed')
-
-    // Urgency / done highlighting for the calendar
-    // Urgent / high-priority tickets: make the whole row red
+    
+    // Priority overrides status for urgent items
     if (item.priority === 'high' || item.priority === 'urgent') {
       classes.push('row-urgent')
+    } else {
+      // Status-based colors (like ALICE)
+      if (item.status === 'open') classes.push('row-open')
+      if (item.status === 'pending') classes.push('row-pending')
+      if (item.status === 'confirmed') classes.push('row-confirmed')
+      if (item.status === 'closed') classes.push('row-closed')
+      if (item.status === 'transferred') classes.push('row-transferred')
+      if (item.status === 'in_progress') classes.push('row-in-progress')
+      if (item.status === 'ordered' || item.status === 'ord') classes.push('row-ordered')
+      if (item.status === 'delayed') classes.push('row-delayed')
     }
-    // Done tickets (closed / confirmed): make the whole row green
-    if (item.status === 'closed' || item.status === 'confirmed' || item.status === 'done') {
-      classes.push('row-done')
-    }
+    
     return classes.join(' ')
   }
 

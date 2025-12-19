@@ -14,57 +14,97 @@
   background: var(--color-bg);
 }
 
-/* Row status backgrounds */
+/* Row status backgrounds - ALICE-style color coding */
+/* Urgent/High Priority: Red background */
+.timeline-row.row-urgent {
+  background: #fee2e2;
+  border-left: 4px solid #dc2626;
+}
+
+.timeline-row.row-urgent:hover {
+  background: #fecaca;
+}
+
+/* Open: Red/light red background */
 .timeline-row.row-open {
-  background: #fef2f2;
+  background: #fee2e2;
+  border-left: 4px solid #ef4444;
 }
 
 .timeline-row.row-open:hover {
-  background: #fee2e2;
+  background: #fecaca;
 }
 
+/* Pending: Orange/Yellow background */
 .timeline-row.row-pending {
-  background: #fefce8;
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
 }
 
 .timeline-row.row-pending:hover {
-  background: #fef9c3;
+  background: #fde68a;
 }
 
+/* Confirmed: Green background */
 .timeline-row.row-confirmed {
-  background: #f0fdf4;
+  background: #dcfce7;
+  border-left: 4px solid #22c55e;
 }
 
 .timeline-row.row-confirmed:hover {
-  background: #dcfce7;
+  background: #bbf7d0;
 }
 
+/* Closed: Yellow/Light background */
 .timeline-row.row-closed {
-  background: var(--color-bg-white);
-  opacity: 0.7;
+  background: #fef9c3;
+  border-left: 4px solid #eab308;
+  opacity: 0.9;
 }
 
+.timeline-row.row-closed:hover {
+  background: #fef08a;
+  opacity: 1;
+}
+
+/* Transferred: Yellow background */
 .timeline-row.row-transferred {
-  background: #f5f3ff;
+  background: #fef9c3;
+  border-left: 4px solid #eab308;
 }
 
 .timeline-row.row-transferred:hover {
-  background: #ede9fe;
+  background: #fef08a;
 }
 
+/* In Progress: Blue background */
+.timeline-row.row-in-progress {
+  background: #dbeafe;
+  border-left: 4px solid #3b82f6;
+}
+
+.timeline-row.row-in-progress:hover {
+  background: #bfdbfe;
+}
+
+/* Ordered: Blue background */
+.timeline-row.row-ordered {
+  background: #dbeafe;
+  border-left: 4px solid #2563eb;
+}
+
+.timeline-row.row-ordered:hover {
+  background: #bfdbfe;
+}
+
+/* Delayed: Red background with stronger border */
 .timeline-row.row-delayed {
-  background: #fef2f2;
-  border-left: 3px solid var(--color-alert-high);
-}
-
-.timeline-row.row-urgent {
   background: #fee2e2;
-  border-left: 3px solid var(--color-alert-high);
+  border-left: 4px solid #dc2626;
 }
 
-.timeline-row.row-done {
-  background: #dcfce7;
-  border-left: 3px solid var(--color-status-confirmed-text);
+.timeline-row.row-delayed:hover {
+  background: #fecaca;
 }
 
 /* Columns */

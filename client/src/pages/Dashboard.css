@@ -445,15 +445,46 @@
     margin-top: var(--space-xs);
   }
 
-  /* Urgency / done colouring for mobile cards */
+  /* Status-based color coding for mobile cards (ALICE-style) */
   .mobile-ticket-card.ticket-urgent {
     background: #fee2e2;
-    border-color: var(--color-alert-high);
+    border-left: 4px solid #dc2626;
   }
 
-  .mobile-ticket-card.ticket-done {
+  .mobile-ticket-card.ticket-open {
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+  }
+
+  .mobile-ticket-card.ticket-pending {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+  }
+
+  .mobile-ticket-card.ticket-confirmed {
     background: #dcfce7;
-    border-color: var(--color-status-confirmed-text);
+    border-left: 4px solid #22c55e;
+  }
+
+  .mobile-ticket-card.ticket-closed {
+    background: #fef9c3;
+    border-left: 4px solid #eab308;
+    opacity: 0.9;
+  }
+
+  .mobile-ticket-card.ticket-transferred {
+    background: #fef9c3;
+    border-left: 4px solid #eab308;
+  }
+
+  .mobile-ticket-card.ticket-in-progress {
+    background: #dbeafe;
+    border-left: 4px solid #3b82f6;
+  }
+
+  .mobile-ticket-card.ticket-ordered {
+    background: #dbeafe;
+    border-left: 4px solid #2563eb;
   }
 
   .dashboard-filters {

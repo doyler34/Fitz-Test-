@@ -162,7 +162,7 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
               {['open', 'pending', 'confirmed', 'in_progress', 'closed'].map(s => (
                 <button
                   key={s}
-                  className={`status-option ${status === s ? 'active' : ''}`}
+                  className={`status-option status-${s} ${status === s ? 'active' : ''}`}
                   onClick={() => handleStatusChange(s)}
                   disabled={loading}
                 >

@@ -3,7 +3,7 @@ import StatusBadge from './StatusBadge'
 import './TimelineRow.css'
 
 function TimelineRow({ item, onClick }) {
-  const time = new Date(item.time)
+  const time = new Date(item.time || item.scheduled_time)
   const timeStr = time.toLocaleTimeString('en-US', { 
     hour: 'numeric', 
     minute: '2-digit',
@@ -18,7 +18,16 @@ function TimelineRow({ item, onClick }) {
     if (item.status === 'closed') classes.push('row-closed')
     if (item.status === 'transferred') classes.push('row-transferred')
     if (item.status === 'delayed') classes.push('row-delayed')
-    if (item.priority === 'high' || item.priority === 'urgent') classes.push('row-urgent')
+
+    // Urgency / done highlighting for the calendar
+    // Urgent / high-priority tickets: make the whole row red
+    if (item.priority === 'high' || item.priority === 'urgent') {
+      classes.push('row-urgent')
+    }
+    // Done tickets (closed / confirmed): make the whole row green
+    if (item.status === 'closed' || item.status === 'confirmed' || item.status === 'done') {
+      classes.push('row-done')
+    }
     return classes.join(' ')
   }
 

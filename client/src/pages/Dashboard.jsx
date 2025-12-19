@@ -238,7 +238,11 @@ function Dashboard() {
               return (
                 <div 
                   key={item.id} 
-                  className="mobile-ticket-card"
+                  className={[
+                    'mobile-ticket-card',
+                    (item.priority === 'high' || item.priority === 'urgent') ? 'ticket-urgent' : '',
+                    (item.status === 'closed' || item.status === 'confirmed' || item.status === 'done') ? 'ticket-done' : ''
+                  ].filter(Boolean).join(' ')}
                   onClick={() => handleItemClick(item)}
                 >
                   <div className="mobile-card-header">

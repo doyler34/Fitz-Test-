@@ -58,7 +58,13 @@
 }
 
 .timeline-row.row-urgent {
+  background: #fee2e2;
   border-left: 3px solid var(--color-alert-high);
+}
+
+.timeline-row.row-done {
+  background: #dcfce7;
+  border-left: 3px solid var(--color-status-confirmed-text);
 }
 
 /* Columns */

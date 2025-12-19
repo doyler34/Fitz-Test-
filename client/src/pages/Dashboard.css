@@ -445,6 +445,17 @@
     margin-top: var(--space-xs);
   }
 
+  /* Urgency / done colouring for mobile cards */
+  .mobile-ticket-card.ticket-urgent {
+    background: #fee2e2;
+    border-color: var(--color-alert-high);
+  }
+
+  .mobile-ticket-card.ticket-done {
+    background: #dcfce7;
+    border-color: var(--color-status-confirmed-text);
+  }
+
   .dashboard-filters {
     flex-direction: column;
     gap: var(--space-md);

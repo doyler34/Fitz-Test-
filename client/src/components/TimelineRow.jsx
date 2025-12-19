@@ -13,19 +13,23 @@ function TimelineRow({ item, onClick }) {
   const getRowClass = () => {
     let classes = ['timeline-row']
     
+    // Normalize status to lowercase for comparison
+    const status = (item.status || '').toLowerCase()
+    const priority = (item.priority || '').toLowerCase()
+    
     // Priority overrides status for urgent items
-    if (item.priority === 'high' || item.priority === 'urgent') {
+    if (priority === 'high' || priority === 'urgent') {
       classes.push('row-urgent')
     } else {
-      // Status-based colors (like ALICE)
-      if (item.status === 'open') classes.push('row-open')
-      if (item.status === 'pending') classes.push('row-pending')
-      if (item.status === 'confirmed') classes.push('row-confirmed')
-      if (item.status === 'closed') classes.push('row-closed')
-      if (item.status === 'transferred') classes.push('row-transferred')
-      if (item.status === 'in_progress') classes.push('row-in-progress')
-      if (item.status === 'ordered' || item.status === 'ord') classes.push('row-ordered')
-      if (item.status === 'delayed') classes.push('row-delayed')
+      // Status-based colors (like ALICE) - case insensitive
+      if (status === 'open') classes.push('row-open')
+      if (status === 'pending') classes.push('row-pending')
+      if (status === 'confirmed') classes.push('row-confirmed')
+      if (status === 'closed') classes.push('row-closed')
+      if (status === 'transferred') classes.push('row-transferred')
+      if (status === 'in_progress' || status === 'in progress') classes.push('row-in-progress')
+      if (status === 'ordered' || status === 'ord') classes.push('row-ordered')
+      if (status === 'delayed') classes.push('row-delayed')
     }
     
     return classes.join(' ')

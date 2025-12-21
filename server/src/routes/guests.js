@@ -23,11 +23,15 @@ router.get('/', async (req, res) => {
 
     const { data, error } = await query
 
-    if (error) throw error
-    res.json(data)
+    if (error) {
+      console.error('Supabase query error:', error)
+      throw error
+    }
+    res.json(data || [])
   } catch (err) {
-    console.error('Get guests error:', err)
-    res.status(500).json({ error: 'Failed to fetch guests' })
+    console.error('Get guests error:', err.message || err)
+    console.error('Error details:', err)
+    res.status(500).json({ error: 'Failed to fetch guests', details: err.message })
   }
 })
 
@@ -75,6 +79,7 @@ router.post('/', async (req, res) => {
       room_number,
       contact_phone,
       contact_email,
+      telegram_chat_id,
       arrival_method,
       flight_number,
       notes
@@ -91,6 +96,7 @@ router.post('/', async (req, res) => {
         room_number,
         contact_phone,
         contact_email,
+        telegram_chat_id,
         arrival_method,
         flight_number,
         notes

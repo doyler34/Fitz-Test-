@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS guests (
   room_number VARCHAR(20),
   contact_phone VARCHAR(50),
   contact_email VARCHAR(255),
+  telegram_chat_id VARCHAR(50),
   arrival_method VARCHAR(50) CHECK (arrival_method IN ('flight', 'train', 'car', 'bus', 'other')),
   flight_number VARCHAR(20),
   check_in_date TIMESTAMPTZ,
@@ -56,11 +57,11 @@ CREATE TABLE IF NOT EXISTS ticket_notes (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Messages table (email history)
+-- Messages table (email and telegram history)
 CREATE TABLE IF NOT EXISTS messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   guest_id UUID NOT NULL REFERENCES guests(id) ON DELETE CASCADE,
-  channel VARCHAR(20) DEFAULT 'email' CHECK (channel IN ('email')),
+  channel VARCHAR(20) DEFAULT 'email' CHECK (channel IN ('email', 'telegram')),
   subject VARCHAR(500),
   content TEXT NOT NULL,
   status VARCHAR(20) DEFAULT 'sent' CHECK (status IN ('pending', 'sent', 'failed')),

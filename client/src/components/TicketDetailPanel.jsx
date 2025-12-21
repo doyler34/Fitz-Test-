@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Clock, User, MapPin, Send, Bell, Mail, Check } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 import { tickets as ticketsApi } from '../services/api'
@@ -10,13 +10,9 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
   const [status, setStatus] = useState(item?.status?.toLowerCase() || 'open')
   const [notes, setNotes] = useState([])
   const [message, setMessage] = useState(null)
-  const [autoCloseRemaining, setAutoCloseRemaining] = useState(null) // seconds until auto-close
 
   // Get the ticket ID from item
   const ticketId = item?.id
-  const autoCloseTimerRef = useRef(null)
-  const AUTO_CLOSE_MS = 5 * 60 * 1000
-  const AUTO_CLOSE_KEY_PREFIX = 'fitz_ticket_autoclose_'
 
   // Fetch full ticket details with notes
   useEffect(() => {
@@ -24,101 +20,6 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
       fetchTicketDetails()
     }
   }, [ticketId])
-
-  // Clear timer on unmount
-  useEffect(() => {
-    return () => {
-      if (autoCloseTimerRef.current) {
-        clearInterval(autoCloseTimerRef.current)
-      }
-    }
-  }, [])
-
-  const stopAutoCloseTimer = () => {
-    if (autoCloseTimerRef.current) {
-      clearInterval(autoCloseTimerRef.current)
-      autoCloseTimerRef.current = null
-    }
-    setAutoCloseRemaining(null)
-
-    // Remove any persisted timer for this ticket
-    if (ticketId && typeof window !== 'undefined') {
-      try {
-        window.localStorage.removeItem(`${AUTO_CLOSE_KEY_PREFIX}${ticketId}`)
-      } catch (e) {
-        // ignore storage errors
-      }
-    }
-  }
-
-  const startAutoCloseTimer = (startTimestampMs) => {
-    if (!ticketId) return
-    const start = startTimestampMs || Date.now()
-    const end = start + AUTO_CLOSE_MS
-
-    // Persist start time so countdown survives panel reopen
-    if (typeof window !== 'undefined') {
-      try {
-        window.localStorage.setItem(
-          `${AUTO_CLOSE_KEY_PREFIX}${ticketId}`,
-          String(start)
-        )
-      } catch (e) {
-        // ignore storage errors
-      }
-    }
-
-    stopAutoCloseTimer()
-
-    const tick = () => {
-      const now = Date.now()
-      const remainingMs = end - now
-      if (remainingMs <= 0) {
-        stopAutoCloseTimer()
-        handleClose() // will set status to closed and refresh
-        return
-      }
-      setAutoCloseRemaining(Math.ceil(remainingMs / 1000))
-    }
-
-    tick()
-    autoCloseTimerRef.current = setInterval(tick, 1000)
-  }
-
-  const maybeResumeAutoCloseTimer = (apiStatus) => {
-    const effectiveStatus = (apiStatus || status || '').toLowerCase()
-    if (effectiveStatus !== 'confirmed' || !ticketId) {
-      stopAutoCloseTimer()
-      return
-    }
-
-    if (typeof window === 'undefined') return
-    try {
-      const key = `${AUTO_CLOSE_KEY_PREFIX}${ticketId}`
-      const stored = window.localStorage.getItem(key)
-      const storedMs = stored ? Number(stored) : NaN
-      const now = Date.now()
-
-      // If we never stored, start from now
-      if (!stored || Number.isNaN(storedMs)) {
-        startAutoCloseTimer(now)
-        return
-      }
-
-      // If 5+ mins already passed, immediately close
-      if (now - storedMs >= AUTO_CLOSE_MS) {
-        stopAutoCloseTimer()
-        handleClose()
-        return
-      }
-
-      // Resume timer from stored start time
-      startAutoCloseTimer(storedMs)
-    } catch (e) {
-      // Fallback: start fresh timer
-      startAutoCloseTimer(Date.now())
-    }
-  }
 
   const fetchTicketDetails = async () => {
     try {
@@ -128,7 +29,6 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
       }
       if (data?.status) {
         setStatus(data.status.toLowerCase())
-        maybeResumeAutoCloseTimer(data.status)
       }
     } catch (err) {
       console.log('Could not fetch ticket details:', err.message)
@@ -150,11 +50,6 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
       await ticketsApi.update(ticketId, { status: newStatus })
       setStatus(newStatus)
       showMessage(`Status changed to ${newStatus}`)
-      if (newStatus === 'confirmed') {
-        maybeResumeAutoCloseTimer(newStatus)
-      } else {
-        stopAutoCloseTimer()
-      }
       onUpdate?.()
     } catch (err) {
       console.error('Failed to update status:', err)
@@ -218,14 +113,7 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
   const guestName = item?.guestName || item?.guest_name
   const roomNumber = item?.roomNumber || item?.room_number
   const ticketType = item?.ticketType || item?.type
-  const statusLabel = (status || 'open').replace('_', ' ')
 
-  const formatSeconds = (seconds) => {
-    if (seconds == null) return ''
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
   return (
     <div className="detail-panel-overlay" onClick={onClose}>
       <div className="detail-panel" onClick={e => e.stopPropagation()}>
@@ -247,68 +135,38 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
         )}
 
         <div className="panel-body">
-          {/* Primary ticket info - ALICE-style layout, Fitz styling */}
+          {/* Info Section */}
           <div className="info-section">
-            {roomNumber && (
-              <div className="field-group">
-                <div className="field-label">ROOM / LOCATION</div>
-                <div className="field-value">
-                  <MapPin size={16} />
-                  <span>{roomNumber}</span>
-                </div>
-              </div>
-            )}
-
-            <div className="field-group">
-              <div className="field-label">TICKET</div>
-              <div className="field-value main-value">
-                {item?.summary || 'Ticket'}
-              </div>
+            <div className="info-row">
+              <Clock size={16} />
+              <span>{formattedTime}</span>
             </div>
-
             {guestName && (
-              <div className="field-group">
-                <div className="field-label">GUEST</div>
-                <div className="field-value">
-                  <User size={16} />
-                  <span>{guestName}</span>
-                </div>
+              <div className="info-row">
+                <User size={16} />
+                <span>{guestName}</span>
               </div>
             )}
-
-            <div className="field-group">
-              <div className="field-label">SCHEDULED</div>
-              <div className="field-value">
-                <Clock size={16} />
-                <span>{formattedTime}</span>
+            {roomNumber && (
+              <div className="info-row">
+                <MapPin size={16} />
+                <span>Room {roomNumber}</span>
               </div>
-            </div>
-
-            <div className="field-group compact-status">
-              <div className="field-label">STATUS</div>
-              <div className="field-value">
-                <StatusBadge status={status} />
-                {status === 'confirmed' && autoCloseRemaining != null && (
-                  <span className="auto-close-timer">
-                    Auto-close in {formatSeconds(autoCloseRemaining)}
-                  </span>
-                )}
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Status Section */}
           <div className="status-section">
             <label>Status</label>
             <div className="status-options">
-              {['open', 'in_progress', 'confirmed', 'closed'].map(s => (
+              {['open', 'pending', 'confirmed', 'in_progress', 'closed'].map(s => (
                 <button
                   key={s}
                   className={`status-option ${status === s ? 'active' : ''}`}
                   onClick={() => handleStatusChange(s)}
                   disabled={loading}
                 >
-                  {s === 'confirmed' ? 'Completed' : s.replace('_', ' ').charAt(0).toUpperCase() + s.replace('_', ' ').slice(1)}
+                  {s.replace('_', ' ').charAt(0).toUpperCase() + s.replace('_', ' ').slice(1)}
                 </button>
               ))}
             </div>
@@ -352,32 +210,19 @@ function TicketDetailPanel({ item, onClose, onUpdate }) {
           </div>
         </div>
 
-        <div className="panel-footer action-footer">
+        <div className="panel-footer">
           <button 
-            className="btn-footer btn-footer-accept"
-            onClick={() => handleStatusChange('confirmed')}
-            disabled={loading || status === 'confirmed' || status === 'closed'}
+            className="btn-secondary"
+            onClick={onClose}
           >
-            Confirmed
+            Cancel
           </button>
           <button 
-            className="btn-footer btn-footer-start"
-            onClick={() => handleStatusChange('in_progress')}
-            disabled={
-              loading || 
-              status === 'in_progress' || 
-              status === 'closed' ||
-              status === 'confirmed'
-            }
-          >
-            Start
-          </button>
-          <button 
-            className="btn-footer btn-footer-close"
+            className="btn-danger"
             onClick={handleClose}
-            disabled={loading || status === 'closed'}
+            disabled={status === 'closed' || loading}
           >
-            Close
+            {status === 'closed' ? 'Closed' : 'Close Ticket'}
           </button>
         </div>
       </div>

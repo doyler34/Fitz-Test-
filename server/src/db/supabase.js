@@ -1,14 +1,12 @@
+import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv'
 
 // Load env vars (for local dev, Vercel injects them automatically)
-dotenv.config()
-
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_ANON_KEY
 
-console.log('Supabase URL:', supabaseUrl ? 'Set' : 'NOT SET')
-console.log('Supabase Key:', supabaseKey ? 'Set' : 'NOT SET')
+console.log('Supabase URL:', supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'NOT SET')
+console.log('Supabase Key:', supabaseKey ? `${supabaseKey.substring(0, 10)}...` : 'NOT SET')
 
 if (!supabaseUrl || !supabaseKey) {
   console.warn('Supabase credentials not found. Database operations will fail.')

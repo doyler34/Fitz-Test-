@@ -260,6 +260,18 @@
 
   .navbar {
     justify-content: space-between;
+    height: var(--topbar-height);
+    padding: 0 var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .navbar-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .logo-icon {
+    font-size: var(--font-size-md);
   }
 
   .navbar-nav {
@@ -284,8 +296,8 @@
   }
 
   .navbar-link {
-    padding: var(--space-md);
-    font-size: var(--font-size-md);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
     border-radius: var(--radius-md);
   }
 
@@ -300,14 +312,15 @@
 
   .mobile-actions .navbar-btn {
     justify-content: center;
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
   }
 
   .mobile-menu-btn-item {
     display: flex;
     align-items: center;
-    gap: var(--space-md);
-    padding: var(--space-md);
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
     background: rgba(255,255,255,0.1);
     border: none;
     border-radius: var(--radius-md);
@@ -351,6 +364,17 @@
 
   .navbar-icon-btn:not(.has-badge) {
     display: none;
+  }
+
+  .navbar-icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
   }
 
   .mobile-overlay {

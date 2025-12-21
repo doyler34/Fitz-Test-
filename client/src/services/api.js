@@ -58,11 +58,6 @@ export const timeline = {
     request('/api/timeline/notes', {
       method: 'POST',
       body: JSON.stringify({ content, priority })
-    }),
-  updateNote: (id, content, priority) =>
-    request(`/api/timeline/notes/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ content, priority })
     })
 }
 
@@ -121,10 +116,10 @@ export const tickets = {
 
 // Messages
 export const messages = {
-  send: (guest_id, subject, content, template) =>
+  send: (guest_id, subject, content, template, channel = 'email') =>
     request('/api/messages/send', {
       method: 'POST',
-      body: JSON.stringify({ guest_id, subject, content, template })
+      body: JSON.stringify({ guest_id, subject, content, template, channel })
     }),
   getForGuest: (guestId) => request(`/api/messages/guest/${guestId}`)
 }
@@ -138,13 +133,40 @@ export const transport = {
   getGuestETA: (guestId) => request(`/api/transport/eta/${guestId}`)
 }
 
+// Storage
+export const storage = {
+  list: (filters = {}) => {
+    const params = new URLSearchParams()
+    if (filters.status) params.set('status', filters.status)
+    if (filters.guest_id) params.set('guest_id', filters.guest_id)
+    if (filters.location) params.set('location', filters.location)
+    return request(`/api/storage?${params}`)
+  },
+  get: (id) => request(`/api/storage/${id}`),
+  create: (data) =>
+    request('/api/storage', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+  update: (id, data) =>
+    request(`/api/storage/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+  delete: (id) =>
+    request(`/api/storage/${id}`, { method: 'DELETE' }),
+  retrieve: (id) =>
+    request(`/api/storage/${id}/retrieve`, { method: 'PUT' })
+}
+
 export default {
   auth,
   timeline,
   guests,
   tickets,
   messages,
-  transport
+  transport,
+  storage
 }
 
 

@@ -7,104 +7,84 @@
   background: var(--color-bg-white);
   border-bottom: 1px solid var(--color-border-light);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .timeline-row:hover {
-  background: var(--color-bg);
+  opacity: 0.9;
+  transform: translateX(2px);
 }
 
-/* Row status backgrounds - ALICE-style color coding */
-/* Urgent/High Priority: Red background */
-.timeline-row.row-urgent {
-  background: #fecaca;
-  border-left: 4px solid #dc2626;
-}
-
-.timeline-row.row-urgent:hover {
-  background: #fca5a5;
-}
-
-/* Open: Blue background */
+/* Row status backgrounds - Full row colors */
+/* Open - Light Red Background */
 .timeline-row.row-open {
-  background: #dbeafe;
-  border-left: 4px solid #3b82f6;
+  background: #fef2f2;
+  border-left: 3px solid #b91c1c;
 }
 
 .timeline-row.row-open:hover {
-  background: #bfdbfe;
+  background: #fee2e2;
 }
 
-/* Pending: Orange/Yellow background */
+/* Pending - Yellow/Amber Background */
 .timeline-row.row-pending {
-  background: #fde68a;
-  border-left: 4px solid #f59e0b;
+  background: #fef3c7;
+  border-left: 3px solid #d97706;
 }
 
 .timeline-row.row-pending:hover {
-  background: #fcd34d;
+  background: #fde68a;
 }
 
-/* Confirmed: Green background */
+/* Confirmed - Light Green Background */
 .timeline-row.row-confirmed {
-  background: #bbf7d0;
-  border-left: 4px solid #22c55e;
+  background: #d1fae5;
+  border-left: 3px solid #065f46;
 }
 
 .timeline-row.row-confirmed:hover {
-  background: #86efac;
+  background: #a7f3d0;
 }
 
-/* Closed: Greyed out */
+/* Closed - Full Green Background */
 .timeline-row.row-closed {
-  background: #f3f4f6;
-  border-left: 4px solid #9ca3af;
-  opacity: 0.9;
+  background: #bbf7d0;
+  border-left: 4px solid #16a34a;
+  opacity: 0.95;
 }
 
 .timeline-row.row-closed:hover {
-  background: #e5e7eb;
-  opacity: 1;
+  background: #86efac;
 }
 
-/* Transferred: Yellow background */
+/* Transferred - Purple/Blue Background */
 .timeline-row.row-transferred {
-  background: #fef08a;
-  border-left: 4px solid #eab308;
+  background: #e0e7ff;
+  border-left: 3px solid #4338ca;
 }
 
 .timeline-row.row-transferred:hover {
-  background: #fde047;
+  background: #c7d2fe;
 }
 
-/* In Progress: Blue background */
-.timeline-row.row-in-progress {
-  background: #bfdbfe;
-  border-left: 4px solid #3b82f6;
-}
-
-.timeline-row.row-in-progress:hover {
-  background: #93c5fd;
-}
-
-/* Ordered: Blue background */
-.timeline-row.row-ordered {
-  background: #bfdbfe;
-  border-left: 4px solid #2563eb;
-}
-
-.timeline-row.row-ordered:hover {
-  background: #93c5fd;
-}
-
-/* Delayed: Red background with stronger border */
+/* Delayed - Red Background (similar to urgent) */
 .timeline-row.row-delayed {
-  background: #fecaca;
+  background: #fee2e2;
   border-left: 4px solid #dc2626;
 }
 
 .timeline-row.row-delayed:hover {
-  background: #fca5a5;
+  background: #fecaca;
+}
+
+/* Urgent/High Priority - Full Red Background (must come last to override status colors) */
+.timeline-row.row-urgent {
+  background: #fee2e2 !important;
+  border-left: 4px solid #dc2626 !important;
+}
+
+.timeline-row.row-urgent:hover {
+  background: #fecaca !important;
 }
 
 /* Columns */

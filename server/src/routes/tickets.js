@@ -42,11 +42,15 @@ router.get('/', async (req, res) => {
 
     const { data, error } = await query
 
-    if (error) throw error
-    res.json(data)
+    if (error) {
+      console.error('Supabase query error:', error)
+      throw error
+    }
+    res.json(data || [])
   } catch (err) {
-    console.error('Get tickets error:', err)
-    res.status(500).json({ error: 'Failed to fetch tickets' })
+    console.error('Get tickets error:', err.message || err)
+    console.error('Error details:', err)
+    res.status(500).json({ error: 'Failed to fetch tickets', details: err.message })
   }
 })
 

@@ -17,5 +17,13 @@
   background: var(--color-bg);
 }
 
+/* Mobile viewport handling */
+@media (max-width: 768px) {
+  .layout {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+  }
+}
+
 
 

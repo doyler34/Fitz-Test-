@@ -219,6 +219,87 @@
     max-height: calc(100vh - var(--topbar-height));
     border-radius: 0;
   }
+
+  .settings-panel .panel-header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .settings-panel .panel-header h3 {
+    font-size: var(--font-size-sm);
+  }
+
+  .panel-content {
+    padding: var(--space-sm);
+  }
+
+  .settings-section {
+    margin-bottom: var(--space-md);
+  }
+
+  .settings-section h4 {
+    font-size: 9px;
+    margin-bottom: var(--space-xs);
+  }
+
+  .user-info {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .user-avatar-large {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-sm);
+  }
+
+  .user-name {
+    font-size: var(--font-size-xs);
+  }
+
+  .user-role {
+    font-size: 9px;
+  }
+
+  .setting-item {
+    padding: var(--space-xs) 0;
+  }
+
+  .setting-info {
+    font-size: var(--font-size-xs);
+    gap: var(--space-xs);
+  }
+
+  .toggle-switch {
+    width: 40px;
+    height: 22px;
+  }
+
+  .toggle-slider {
+    width: 18px;
+    height: 18px;
+  }
+
+  .toggle-switch.active .toggle-slider {
+    transform: translateX(18px);
+  }
+
+  .about-info {
+    padding: var(--space-sm);
+  }
+
+  .about-info p {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-xs);
+  }
+
+  .settings-panel .panel-footer {
+    padding: var(--space-sm);
+  }
+
+  .logout-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
 }
 
 

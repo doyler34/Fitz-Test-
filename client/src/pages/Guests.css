@@ -433,10 +433,17 @@
 }
 
 .message-channel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
   font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-primary);
   text-transform: uppercase;
+}
+
+.message-channel.channel-telegram {
+  color: #0088cc;
 }
 
 .message-time {
@@ -448,6 +455,67 @@
   font-size: var(--font-size-sm);
   color: var(--color-text);
   margin: 0;
+}
+
+.message-content {
+  margin-top: var(--space-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  white-space: pre-wrap;
+}
+
+/* Channel Selector */
+.channel-selector {
+  margin-bottom: var(--space-md);
+}
+
+.channel-selector label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.channel-buttons {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.channel-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-white);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.channel-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+.channel-btn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.channel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.channel-btn .unavailable {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+  margin-left: var(--space-xs);
 }
 
 .no-messages,
@@ -527,6 +595,230 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .guests-header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .guests-header h1 {
+    font-size: var(--font-size-lg);
+  }
+
+  .guests-header .btn-primary {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .guests-filters {
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    align-items: stretch;
+  }
+
+  .guests-filters .search-box {
+    width: 100%;
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .guests-filters .refresh-btn {
+    width: 32px;
+    height: 32px;
+    margin-left: 0;
+    align-self: flex-end;
+  }
+
+  .guests-grid {
+    padding: var(--space-sm);
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+
+  .guest-card {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .guest-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-sm);
+  }
+
+  .guest-info h3 {
+    font-size: var(--font-size-sm);
+  }
+
+  .guest-meta {
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+  }
+
+  .room-badge,
+  .arrival-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .guest-checkin {
+    font-size: 9px;
+  }
+
+  /* Guest Detail */
+  .detail-header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .back-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .detail-profile {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: var(--font-size-lg);
+  }
+
+  .profile-info h1 {
+    font-size: var(--font-size-lg);
+  }
+
+  .profile-meta {
+    gap: var(--space-xs);
+  }
+
+  .detail-tabs {
+    padding: 0 var(--space-sm);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+  }
+
+  .detail-content {
+    padding: var(--space-md);
+  }
+
+  .info-section {
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  .info-section h3 {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-sm);
+  }
+
+  .info-item {
+    font-size: var(--font-size-xs);
+    gap: var(--space-xs);
+  }
+
+  .send-message {
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  .send-message h3 {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-sm);
+  }
+
+  .quick-templates {
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-sm);
+  }
+
+  .quick-templates button {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .message-form input,
+  .message-form textarea {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .send-btn {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-xs);
+  }
+
+  .message-history {
+    padding: var(--space-md);
+  }
+
+  .message-history h3 {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-sm);
+  }
+
+  .message-item {
+    padding: var(--space-sm);
+    margin-bottom: var(--space-xs);
+  }
+
+  .message-meta {
+    margin-bottom: 3px;
+  }
+
+  .message-channel,
+  .message-time {
+    font-size: 9px;
+  }
+
+  .message-subject {
+    font-size: var(--font-size-xs);
+  }
+
+  .tickets-tab {
+    padding: var(--space-md);
+  }
+
+  .tickets-tab h3 {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-sm);
+  }
+
+  .ticket-item {
+    padding: var(--space-sm);
+    margin-bottom: var(--space-xs);
+    gap: var(--space-xs);
+  }
+
+  .ticket-status {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .ticket-summary {
+    font-size: var(--font-size-xs);
+  }
+
+  .ticket-time {
+    font-size: 9px;
+  }
+
+  .loading-state,
+  .empty-state {
+    padding: var(--space-lg);
+    font-size: var(--font-size-xs);
+  }
 }
 
 

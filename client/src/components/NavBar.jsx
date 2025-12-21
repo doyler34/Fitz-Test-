@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Ticket, Users, Train, Search, Bell, Settings, HelpCircle, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Ticket, Users, Train, Package, Search, Bell, Settings, HelpCircle, Menu, X } from 'lucide-react'
 import { useFilters } from '../hooks/useFilters'
 import TicketModal from './TicketModal'
 import NotificationsPanel from './NotificationsPanel'
@@ -20,6 +20,7 @@ function NavBar() {
     { to: '/tickets', label: 'Tickets', icon: Ticket },
     { to: '/guests', label: 'Guests', icon: Users },
     { to: '/transport', label: 'Transport', icon: Train },
+    { to: '/storage', label: 'Storage', icon: Package },
   ]
 
   const handleCreateTicket = (type) => {

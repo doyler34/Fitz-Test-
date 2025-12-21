@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Search, Plus, RefreshCw, Plane, Train, Car, Mail, Phone, MapPin, Calendar, ArrowLeft } from 'lucide-react'
+import { Search, Plus, RefreshCw, Plane, Train, Car, Mail, Phone, MapPin, Calendar, ArrowLeft, MessageSquare } from 'lucide-react'
 import { guests as guestsApi, messages as messagesApi } from '../services/api'
 import './Guests.css'
 
@@ -103,18 +103,19 @@ function GuestDetail({ guest, onBack, onUpdate }) {
   const [activeTab, setActiveTab] = useState('info')
   const [emailSubject, setEmailSubject] = useState('')
   const [emailContent, setEmailContent] = useState('')
+  const [selectedChannel, setSelectedChannel] = useState('email')
   const [sending, setSending] = useState(false)
 
   const handleSendEmail = async (template) => {
     setSending(true)
     try {
-      await messagesApi.send(guest.id, emailSubject, emailContent, template)
+      await messagesApi.send(guest.id, emailSubject, emailContent, template, selectedChannel)
       setEmailSubject('')
       setEmailContent('')
-      alert('Email sent successfully!')
+      alert(`${selectedChannel === 'email' ? 'Email' : 'Telegram message'} sent successfully!`)
     } catch (err) {
-      console.error('Failed to send email:', err)
-      alert('Email sent (demo mode)')
+      console.error(`Failed to send ${selectedChannel}:`, err)
+      alert(`Message sent (demo mode)`)
     } finally {
       setSending(false)
     }
@@ -222,7 +223,33 @@ function GuestDetail({ guest, onBack, onUpdate }) {
         {activeTab === 'messages' && (
           <div className="messages-tab">
             <div className="send-message">
-              <h3>Send Email</h3>
+              <h3>Send Message</h3>
+              
+              {/* Channel Selector */}
+              <div className="channel-selector">
+                <label>Channel:</label>
+                <div className="channel-buttons">
+                  <button 
+                    className={`channel-btn ${selectedChannel === 'email' ? 'active' : ''}`}
+                    onClick={() => setSelectedChannel('email')}
+                    disabled={!guest.contact_email}
+                  >
+                    <Mail size={16} />
+                    Email
+                    {!guest.contact_email && <span className="unavailable">(No email)</span>}
+                  </button>
+                  <button 
+                    className={`channel-btn ${selectedChannel === 'telegram' ? 'active' : ''}`}
+                    onClick={() => setSelectedChannel('telegram')}
+                    disabled={!guest.telegram_chat_id}
+                  >
+                    <MessageSquare size={16} />
+                    Telegram
+                    {!guest.telegram_chat_id && <span className="unavailable">(No chat ID)</span>}
+                  </button>
+                </div>
+              </div>
+
               <div className="quick-templates">
                 <button onClick={() => handleSendEmail('pre_arrival')}>
                   Pre-Arrival Welcome
@@ -234,7 +261,7 @@ function GuestDetail({ guest, onBack, onUpdate }) {
               <div className="message-form">
                 <input
                   type="text"
-                  placeholder="Subject"
+                  placeholder="Subject (optional for Telegram)"
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
                 />
@@ -247,9 +274,9 @@ function GuestDetail({ guest, onBack, onUpdate }) {
                 <button 
                   className="send-btn"
                   onClick={() => handleSendEmail(null)}
-                  disabled={sending || (!emailSubject && !emailContent)}
+                  disabled={sending || (!emailContent)}
                 >
-                  {sending ? 'Sending...' : 'Send Email'}
+                  {sending ? 'Sending...' : `Send ${selectedChannel === 'email' ? 'Email' : 'Telegram Message'}`}
                 </button>
               </div>
             </div>
@@ -260,12 +287,16 @@ function GuestDetail({ guest, onBack, onUpdate }) {
                 guest.messages.map(msg => (
                   <div key={msg.id} className="message-item">
                     <div className="message-meta">
-                      <span className="message-channel">{msg.channel}</span>
+                      <span className={`message-channel channel-${msg.channel}`}>
+                        {msg.channel === 'email' ? <Mail size={12} /> : <MessageSquare size={12} />}
+                        {msg.channel}
+                      </span>
                       <span className="message-time">
                         {new Date(msg.sent_at).toLocaleString()}
                       </span>
                     </div>
-                    <p className="message-subject">{msg.subject}</p>
+                    {msg.subject && <p className="message-subject">{msg.subject}</p>}
+                    <p className="message-content">{msg.content}</p>
                   </div>
                 ))
               ) : (

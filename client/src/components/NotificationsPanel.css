@@ -199,10 +199,64 @@
     border-radius: 0;
   }
 
+  .notifications-panel .panel-header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .notifications-panel .panel-header h3 {
+    font-size: var(--font-size-sm);
+  }
+
+  .panel-content {
+    padding: var(--space-sm);
+  }
+
+  .notification-section {
+    margin-bottom: var(--space-md);
+  }
+
+  .notification-section h4 {
+    font-size: 9px;
+    margin-bottom: var(--space-xs);
+  }
+
+  .notification-item {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .notification-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .notification-title {
+    font-size: var(--font-size-xs);
+  }
+
   .notification-summary {
+    font-size: var(--font-size-xs);
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
+  }
+
+  .notification-time {
+    font-size: 9px;
+  }
+
+  .notifications-panel .panel-footer {
+    padding: var(--space-sm);
+  }
+
+  .mark-all-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .empty-message {
+    padding: var(--space-md);
+    font-size: var(--font-size-xs);
   }
 }
 

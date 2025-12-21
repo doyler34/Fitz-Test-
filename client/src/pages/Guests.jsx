@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Search, Plus, RefreshCw, Plane, Train, Car, Mail, Phone, MapPin, Calendar, ArrowLeft, MessageSquare, Edit2, Save, X } from 'lucide-react'
+import { Search, Plus, RefreshCw, Plane, Train, Car, Mail, Phone, MapPin, Calendar, ArrowLeft, MessageSquare, Edit2, Save, X, Check } from 'lucide-react'
 import { guests as guestsApi, messages as messagesApi } from '../services/api'
 import './Guests.css'
 
@@ -476,6 +476,207 @@ function GuestDetail({ guest, onBack, onUpdate }) {
   )
 }
 
+function GuestModal({ onClose, onCreated }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    room_number: '',
+    contact_email: '',
+    contact_phone: '',
+    telegram_chat_id: '',
+    arrival_method: '',
+    flight_number: '',
+    check_in_date: new Date().toISOString().slice(0, 16),
+    notes: ''
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!formData.name.trim() || !formData.room_number.trim()) {
+      setError('Name and room number are required')
+      return
+    }
+    
+    setLoading(true)
+    setError(null)
+
+    try {
+      const guestData = {
+        name: formData.name.trim(),
+        room_number: formData.room_number.trim(),
+        contact_email: formData.contact_email.trim() || null,
+        contact_phone: formData.contact_phone.trim() || null,
+        telegram_chat_id: formData.telegram_chat_id.trim() || null,
+        arrival_method: formData.arrival_method || null,
+        flight_number: formData.flight_number.trim() || null,
+        check_in_date: new Date(formData.check_in_date).toISOString(),
+        notes: formData.notes.trim() || null
+      }
+      await guestsApi.create(guestData)
+      setSuccess(true)
+      setTimeout(() => {
+        onCreated?.()
+        onClose()
+      }, 1000)
+    } catch (err) {
+      console.error('Failed to create guest:', err)
+      setError(err.message || 'Failed to create guest. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>Add New Guest</h2>
+          <button className="modal-close" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="modal-body">
+            {error && <div className="form-error">{error}</div>}
+            {success && (
+              <div className="form-success">
+                <Check size={16} />
+                Guest created successfully!
+              </div>
+            )}
+
+            <div className="form-group">
+              <label>Full Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+                required
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Room Number *</label>
+                <input
+                  type="text"
+                  name="room_number"
+                  value={formData.room_number}
+                  onChange={handleChange}
+                  placeholder="101"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Check-in Date</label>
+                <input
+                  type="datetime-local"
+                  name="check_in_date"
+                  value={formData.check_in_date}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="contact_email"
+                  value={formData.contact_email}
+                  onChange={handleChange}
+                  placeholder="guest@example.com"
+                />
+              </div>
+              <div className="form-group">
+                <label>Phone</label>
+                <input
+                  type="tel"
+                  name="contact_phone"
+                  value={formData.contact_phone}
+                  onChange={handleChange}
+                  placeholder="+1 555-123-4567"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Telegram Chat ID</label>
+              <input
+                type="text"
+                name="telegram_chat_id"
+                value={formData.telegram_chat_id}
+                onChange={handleChange}
+                placeholder="Optional"
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Arrival Method</label>
+                <select
+                  name="arrival_method"
+                  value={formData.arrival_method}
+                  onChange={handleChange}
+                >
+                  <option value="">Select method</option>
+                  <option value="flight">Flight</option>
+                  <option value="train">Train</option>
+                  <option value="car">Car</option>
+                  <option value="bus">Bus</option>
+                </select>
+              </div>
+              {formData.arrival_method === 'flight' && (
+                <div className="form-group">
+                  <label>Flight Number</label>
+                  <input
+                    type="text"
+                    name="flight_number"
+                    value={formData.flight_number}
+                    onChange={handleChange}
+                    placeholder="EI123"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>Notes</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                placeholder="Additional notes about the guest..."
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <div className="modal-footer">
+            <button type="button" className="btn-secondary" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary" disabled={loading || success}>
+              {loading ? 'Creating...' : success ? 'Created!' : 'Create Guest'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 function Guests() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -483,6 +684,7 @@ function Guests() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedGuest, setSelectedGuest] = useState(null)
+  const [showGuestModal, setShowGuestModal] = useState(false)
 
   useEffect(() => {
     loadGuests()
@@ -594,7 +796,7 @@ function Guests() {
     <div className="guests-page">
       <div className="guests-header">
         <h1>Guests</h1>
-        <button className="btn-primary">
+        <button className="btn-primary" onClick={() => setShowGuestModal(true)}>
           <Plus size={16} />
           Add Guest
         </button>
@@ -630,6 +832,16 @@ function Guests() {
           ))
         )}
       </div>
+
+      {showGuestModal && (
+        <GuestModal
+          onClose={() => setShowGuestModal(false)}
+          onCreated={() => {
+            setShowGuestModal(false)
+            loadGuests()
+          }}
+        />
+      )}
     </div>
   )
 }

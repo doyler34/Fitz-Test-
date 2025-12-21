@@ -815,7 +815,14 @@ function Guests() {
     <div className="guests-page">
       <div className="guests-header">
         <h1>Guests</h1>
-        <button className="btn-primary" onClick={() => setShowGuestModal(true)}>
+        <button 
+          type="button"
+          className="btn-primary" 
+          onClick={() => {
+            console.log('Add Guest button clicked, setting modal to true')
+            setShowGuestModal(true)
+          }}
+        >
           <Plus size={16} />
           Add Guest
         </button>

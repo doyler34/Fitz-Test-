@@ -14,7 +14,80 @@ if (process.env.RESEND_API_KEY) {
 // Initialize Telegram bot if token is present
 let telegramBot = null
 if (process.env.TELEGRAM_BOT_TOKEN) {
-  telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false })
+  telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true })
+  
+  // Handle incoming messages
+  telegramBot.on('message', async (msg) => {
+    const chatId = msg.chat.id.toString()
+    const text = msg.text || ''
+    const userId = msg.from?.id
+    const userName = msg.from?.first_name || msg.from?.username || 'Guest'
+    const userPhone = msg.from?.phone_number || null
+    
+    console.log('Telegram message received:', { chatId, text, userId, userName, userPhone })
+    
+    // Handle /start command
+    if (text.startsWith('/start')) {
+      try {
+        // Extract identifier from message (e.g., /start +353851097425 or /start email@example.com)
+        const identifier = text.split(' ')[1] || null
+        
+        if (identifier) {
+          // Try to find guest by phone or email
+          const { data: guests } = await supabase
+            .from('guests')
+            .select('id, name, contact_phone, contact_email')
+            .or(`contact_phone.ilike.%${identifier}%,contact_email.ilike.%${identifier}%`)
+            .limit(1)
+          
+          if (guests && guests.length > 0) {
+            // Update guest with chat ID
+            await supabase
+              .from('guests')
+              .update({ telegram_chat_id: chatId })
+              .eq('id', guests[0].id)
+            
+            await telegramBot.sendMessage(chatId, 
+              `Hello ${guests[0].name}! ✅\n\n` +
+              `You've been successfully registered with The Fitz Hotel concierge.\n\n` +
+              `Your Telegram chat ID: ${chatId}\n\n` +
+              `You can now receive messages from our concierge team.`
+            )
+          } else {
+            await telegramBot.sendMessage(chatId, 
+              `Hello ${userName}! 👋\n\n` +
+              `Guest not found with that identifier.\n\n` +
+              `Your Telegram chat ID is: ${chatId}\n\n` +
+              `Please contact the concierge to link your account.`
+            )
+          }
+        } else {
+          // No identifier provided, just welcome them
+          await telegramBot.sendMessage(chatId, 
+            `Welcome to The Fitz Hotel Concierge! 👋\n\n` +
+            `Your Telegram chat ID: ${chatId}\n\n` +
+            `To register, send: /start followed by your phone number or email\n` +
+            `Example: /start +353851097425\n\n` +
+            `Or contact the concierge to link your account.`
+          )
+        }
+      } catch (error) {
+        console.error('Error handling /start command:', error)
+        await telegramBot.sendMessage(chatId, 
+          'Sorry, there was an error processing your request. Please try again later.'
+        )
+      }
+    } else {
+      // For any other message, acknowledge it
+      await telegramBot.sendMessage(chatId, 
+        `Thank you for your message, ${userName}! 💬\n\n` +
+        `The concierge team will respond shortly.\n\n` +
+        `Your chat ID: ${chatId}`
+      )
+    }
+  })
+  
+  console.log('Telegram bot initialized and listening for messages')
 }
 
 // POST /api/messages/send - Send message (email or telegram) to guest
@@ -107,15 +180,29 @@ The Fitz Concierge Team
       if (process.env.TELEGRAM_BOT_TOKEN && telegramBot) {
         try {
           const telegramMessage = messageSubject ? `*${messageSubject}*\n\n${messageContent}` : messageContent
-          // Format phone number if it looks like one (remove spaces, dashes, etc.)
+          // Format chat ID or phone number (remove spaces, dashes, etc.)
           const chatId = telegramChatId.replace(/[\s\-\(\)]/g, '')
+          
           await telegramBot.sendMessage(chatId, telegramMessage, {
             parse_mode: 'Markdown'
           })
         } catch (telegramError) {
           console.error('Telegram send error:', telegramError)
           sendStatus = 'failed'
-          sendError = telegramError.message
+          
+          // Provide user-friendly error messages
+          if (telegramError.response?.body?.description) {
+            const errorDesc = telegramError.response.body.description
+            if (errorDesc.includes('chat not found')) {
+              sendError = 'Telegram chat not found. The phone number or chat ID may not be valid, or the user may not have started a conversation with the bot. Please ensure the guest has messaged your Telegram bot first to get their chat ID.'
+            } else if (errorDesc.includes('bot was blocked')) {
+              sendError = 'The user has blocked the Telegram bot. Please ask them to unblock it.'
+            } else {
+              sendError = `Telegram error: ${errorDesc}`
+            }
+          } else {
+            sendError = telegramError.message || 'Failed to send Telegram message'
+          }
         }
       } else {
         console.log('Telegram message would be sent (demo mode):', { chatId: telegramChatId, content: messageContent })

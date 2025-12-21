@@ -112,13 +112,20 @@ function GuestDetail({ guest, onBack, onUpdate }) {
   const handleSendEmail = async (template) => {
     setSending(true)
     try {
-      await messagesApi.send(editedGuest.id, emailSubject, emailContent, template, selectedChannel)
+      const result = await messagesApi.send(editedGuest.id, emailSubject, emailContent, template, selectedChannel)
       setEmailSubject('')
       setEmailContent('')
-      alert(`${selectedChannel === 'email' ? 'Email' : 'Telegram message'} sent successfully!`)
+      
+      // Check if there was an error in the response
+      if (result.error) {
+        alert(`Message sent but there was an issue: ${result.error}`)
+      } else {
+        alert(`${selectedChannel === 'email' ? 'Email' : 'Telegram message'} sent successfully!`)
+      }
     } catch (err) {
       console.error(`Failed to send ${selectedChannel}:`, err)
-      alert(`Message sent (demo mode)`)
+      const errorMessage = err.message || err.error || `Failed to send ${selectedChannel === 'email' ? 'email' : 'Telegram message'}. Please try again.`
+      alert(errorMessage)
     } finally {
       setSending(false)
     }
@@ -296,10 +303,10 @@ function GuestDetail({ guest, onBack, onUpdate }) {
                       className="edit-field"
                       value={editedGuest.telegram_chat_id || ''}
                       onChange={(e) => setEditedGuest({ ...editedGuest, telegram_chat_id: e.target.value })}
-                      placeholder="Phone number or Telegram chat ID"
+                      placeholder="Chat ID or phone number"
                     />
                   ) : (
-                    <span>{editedGuest.telegram_chat_id || 'No Telegram chat ID or phone'}</span>
+                    <span>{editedGuest.telegram_chat_id || 'No Telegram chat ID'}</span>
                   )}
                 </div>
               </div>
@@ -637,10 +644,10 @@ function GuestModal({ onClose, onCreated }) {
                 name="telegram_chat_id"
                 value={formData.telegram_chat_id}
                 onChange={handleChange}
-                placeholder="Phone number or Telegram chat ID"
+                placeholder="Chat ID or phone number (e.g., +353851097425)"
               />
               <small style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)', marginTop: '4px', display: 'block' }}>
-                Enter phone number (e.g., +353851097425) or Telegram chat ID
+                Enter Telegram chat ID (numeric) or phone number. Note: Phone numbers may not work if the user hasn't messaged your bot first.
               </small>
             </div>
 

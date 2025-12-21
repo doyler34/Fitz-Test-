@@ -86,8 +86,8 @@ router.post('/', async (req, res) => {
       notes
     } = req.body
 
-    if (!name || !room_number) {
-      return res.status(400).json({ error: 'Name and room number required' })
+    if (!name) {
+      return res.status(400).json({ error: 'Name is required' })
     }
 
     const { data, error } = await supabase

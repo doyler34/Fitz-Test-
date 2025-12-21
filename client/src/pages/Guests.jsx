@@ -499,8 +499,8 @@ function GuestModal({ onClose, onCreated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.name.trim() || !formData.room_number.trim()) {
-      setError('Name and room number are required')
+    if (!formData.name.trim()) {
+      setError('Name is required')
       return
     }
     
@@ -522,7 +522,7 @@ function GuestModal({ onClose, onCreated }) {
 
       const guestData = {
         name: formData.name.trim(),
-        room_number: formData.room_number.trim(),
+        room_number: formData.room_number.trim() || null,
         contact_email: formData.contact_email.trim() || null,
         contact_phone: formData.contact_phone.trim() || null,
         telegram_chat_id: formData.telegram_chat_id.trim() || null,
@@ -587,14 +587,13 @@ function GuestModal({ onClose, onCreated }) {
             </div>
 
             <div className="form-group">
-              <label>Room Number *</label>
+              <label>Room Number (Optional)</label>
               <input
                 type="text"
                 name="room_number"
                 value={formData.room_number}
                 onChange={handleChange}
                 placeholder="101"
-                required
               />
             </div>
 

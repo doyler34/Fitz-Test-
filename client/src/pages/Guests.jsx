@@ -485,7 +485,7 @@ function GuestModal({ onClose, onCreated }) {
     telegram_chat_id: '',
     arrival_method: '',
     flight_number: '',
-    check_in_date: new Date().toISOString().slice(0, 16),
+    check_in_date: '',
     notes: ''
   })
   const [loading, setLoading] = useState(false)
@@ -508,6 +508,18 @@ function GuestModal({ onClose, onCreated }) {
     setError(null)
 
     try {
+      // Validate and format check-in date
+      let checkInDate = null
+      if (formData.check_in_date) {
+        const date = new Date(formData.check_in_date)
+        if (isNaN(date.getTime())) {
+          setError('Invalid check-in date')
+          setLoading(false)
+          return
+        }
+        checkInDate = date.toISOString()
+      }
+
       const guestData = {
         name: formData.name.trim(),
         room_number: formData.room_number.trim(),
@@ -516,7 +528,7 @@ function GuestModal({ onClose, onCreated }) {
         telegram_chat_id: formData.telegram_chat_id.trim() || null,
         arrival_method: formData.arrival_method || null,
         flight_number: formData.flight_number.trim() || null,
-        check_in_date: new Date(formData.check_in_date).toISOString(),
+        check_in_date: checkInDate,
         notes: formData.notes.trim() || null
       }
       await guestsApi.create(guestData)
@@ -527,7 +539,16 @@ function GuestModal({ onClose, onCreated }) {
       }, 1000)
     } catch (err) {
       console.error('Failed to create guest:', err)
-      setError(err.message || 'Failed to create guest. Please try again.')
+      // Extract error message from various possible formats
+      let errorMessage = 'Failed to create guest. Please try again.'
+      if (err.message) {
+        errorMessage = err.message
+      } else if (err.error) {
+        errorMessage = err.error
+      } else if (typeof err === 'string') {
+        errorMessage = err
+      }
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -565,27 +586,16 @@ function GuestModal({ onClose, onCreated }) {
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Room Number *</label>
-                <input
-                  type="text"
-                  name="room_number"
-                  value={formData.room_number}
-                  onChange={handleChange}
-                  placeholder="101"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Check-in Date</label>
-                <input
-                  type="datetime-local"
-                  name="check_in_date"
-                  value={formData.check_in_date}
-                  onChange={handleChange}
-                />
-              </div>
+            <div className="form-group">
+              <label>Room Number *</label>
+              <input
+                type="text"
+                name="room_number"
+                value={formData.room_number}
+                onChange={handleChange}
+                placeholder="101"
+                required
+              />
             </div>
 
             <div className="form-row">
@@ -622,15 +632,25 @@ function GuestModal({ onClose, onCreated }) {
               />
             </div>
 
+            <div className="form-group">
+              <label>Check-in Date (Optional)</label>
+              <input
+                type="datetime-local"
+                name="check_in_date"
+                value={formData.check_in_date}
+                onChange={handleChange}
+              />
+            </div>
+
             <div className="form-row">
               <div className="form-group">
-                <label>Arrival Method</label>
+                <label>Arrival Method (Optional)</label>
                 <select
                   name="arrival_method"
                   value={formData.arrival_method}
                   onChange={handleChange}
                 >
-                  <option value="">Select method</option>
+                  <option value="">Not specified</option>
                   <option value="flight">Flight</option>
                   <option value="train">Train</option>
                   <option value="car">Car</option>
@@ -639,7 +659,7 @@ function GuestModal({ onClose, onCreated }) {
               </div>
               {formData.arrival_method === 'flight' && (
                 <div className="form-group">
-                  <label>Flight Number</label>
+                  <label>Flight Number (Optional)</label>
                   <input
                     type="text"
                     name="flight_number"

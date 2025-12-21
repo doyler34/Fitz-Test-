@@ -82,6 +82,7 @@ router.post('/', async (req, res) => {
       telegram_chat_id,
       arrival_method,
       flight_number,
+      check_in_date,
       notes
     } = req.body
 
@@ -99,16 +100,20 @@ router.post('/', async (req, res) => {
         telegram_chat_id,
         arrival_method,
         flight_number,
+        check_in_date,
         notes
       })
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase insert error:', error)
+      return res.status(400).json({ error: error.message || 'Failed to create guest', details: error })
+    }
     res.status(201).json(data)
   } catch (err) {
     console.error('Create guest error:', err)
-    res.status(500).json({ error: 'Failed to create guest' })
+    res.status(500).json({ error: err.message || 'Failed to create guest' })
   }
 })
 

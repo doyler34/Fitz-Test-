@@ -96,15 +96,20 @@ The Fitz Concierge Team
         console.log('Email would be sent (demo mode):', { to: guest.contact_email, subject: messageSubject })
       }
     } else if (channel === 'telegram') {
-      if (!guest.telegram_chat_id) {
-        return res.status(400).json({ error: 'Guest has no Telegram chat ID' })
+      // Use telegram_chat_id if available, otherwise try phone number
+      const telegramChatId = guest.telegram_chat_id || guest.contact_phone
+      
+      if (!telegramChatId) {
+        return res.status(400).json({ error: 'Guest has no Telegram chat ID or phone number' })
       }
 
       // Send Telegram message
       if (process.env.TELEGRAM_BOT_TOKEN && telegramBot) {
         try {
           const telegramMessage = messageSubject ? `*${messageSubject}*\n\n${messageContent}` : messageContent
-          await telegramBot.sendMessage(guest.telegram_chat_id, telegramMessage, {
+          // Format phone number if it looks like one (remove spaces, dashes, etc.)
+          const chatId = telegramChatId.replace(/[\s\-\(\)]/g, '')
+          await telegramBot.sendMessage(chatId, telegramMessage, {
             parse_mode: 'Markdown'
           })
         } catch (telegramError) {
@@ -113,7 +118,7 @@ The Fitz Concierge Team
           sendError = telegramError.message
         }
       } else {
-        console.log('Telegram message would be sent (demo mode):', { chatId: guest.telegram_chat_id, content: messageContent })
+        console.log('Telegram message would be sent (demo mode):', { chatId: telegramChatId, content: messageContent })
       }
     } else {
       return res.status(400).json({ error: 'Invalid channel. Use "email" or "telegram"' })

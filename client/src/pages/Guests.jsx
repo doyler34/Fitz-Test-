@@ -286,10 +286,10 @@ function GuestDetail({ guest, onBack, onUpdate }) {
                       className="edit-field"
                       value={editedGuest.telegram_chat_id || ''}
                       onChange={(e) => setEditedGuest({ ...editedGuest, telegram_chat_id: e.target.value })}
-                      placeholder="Telegram Chat ID"
+                      placeholder="Phone number or Telegram chat ID"
                     />
                   ) : (
-                    <span>{editedGuest.telegram_chat_id || 'No Telegram chat ID'}</span>
+                    <span>{editedGuest.telegram_chat_id || 'No Telegram chat ID or phone'}</span>
                   )}
                 </div>
               </div>
@@ -386,11 +386,11 @@ function GuestDetail({ guest, onBack, onUpdate }) {
                   <button 
                     className={`channel-btn ${selectedChannel === 'telegram' ? 'active' : ''}`}
                     onClick={() => setSelectedChannel('telegram')}
-                    disabled={!editedGuest.telegram_chat_id}
+                    disabled={!editedGuest.telegram_chat_id && !editedGuest.contact_phone}
                   >
                     <MessageSquare size={16} />
                     Telegram
-                    {!editedGuest.telegram_chat_id && <span className="unavailable">(No chat ID)</span>}
+                    {!editedGuest.telegram_chat_id && !editedGuest.contact_phone && <span className="unavailable">(No chat ID or phone)</span>}
                   </button>
                 </div>
               </div>
@@ -621,14 +621,17 @@ function GuestModal({ onClose, onCreated }) {
             </div>
 
             <div className="form-group">
-              <label>Telegram Chat ID</label>
+              <label>Telegram Chat ID or Phone Number</label>
               <input
                 type="text"
                 name="telegram_chat_id"
                 value={formData.telegram_chat_id}
                 onChange={handleChange}
-                placeholder="Optional"
+                placeholder="Phone number or Telegram chat ID"
               />
+              <small style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-xs)', marginTop: '4px', display: 'block' }}>
+                Enter phone number (e.g., +353851097425) or Telegram chat ID
+              </small>
             </div>
 
             <div className="form-group">

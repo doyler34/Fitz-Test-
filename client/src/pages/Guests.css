@@ -188,6 +188,9 @@
 }
 
 .detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--space-lg) var(--space-xl);
   background: var(--color-bg-white);
   border-bottom: 1px solid var(--color-border);
@@ -209,6 +212,71 @@
 .back-btn:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.edit-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.save-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-action);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: var(--color-action-hover);
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .detail-profile {
@@ -325,6 +393,71 @@
   color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.6;
+}
+
+/* Edit Mode Styles */
+.edit-name-input {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  width: 100%;
+  max-width: 400px;
+}
+
+.edit-name-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.edit-room-input {
+  padding: 4px 12px;
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-white);
+  color: var(--color-primary);
+  font-weight: 500;
+  max-width: 120px;
+}
+
+.edit-room-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.edit-field {
+  flex: 1;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-bg-white);
+}
+
+.edit-field:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.edit-notes {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-bg-white);
+  font-family: inherit;
+  resize: vertical;
+}
+
+.edit-notes:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 
 /* Messages Tab */
@@ -670,11 +803,32 @@
   /* Guest Detail */
   .detail-header {
     padding: var(--space-sm) var(--space-md);
+    flex-direction: column;
+    gap: var(--space-sm);
+    align-items: stretch;
   }
 
   .back-btn {
     padding: var(--space-xs) var(--space-sm);
     font-size: var(--font-size-xs);
+  }
+
+  .edit-btn,
+  .cancel-btn,
+  .save-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .edit-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .edit-actions .cancel-btn,
+  .edit-actions .save-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .detail-profile {

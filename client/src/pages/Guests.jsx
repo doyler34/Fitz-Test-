@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Search, Plus, RefreshCw, Plane, Train, Car, Mail, Phone, MapPin, Calendar, ArrowLeft, MessageSquare } from 'lucide-react'
+import { Search, Plus, RefreshCw, Plane, Train, Car, Mail, Phone, MapPin, Calendar, ArrowLeft, MessageSquare, Edit2, Save, X } from 'lucide-react'
 import { guests as guestsApi, messages as messagesApi } from '../services/api'
 import './Guests.css'
 
@@ -105,11 +105,14 @@ function GuestDetail({ guest, onBack, onUpdate }) {
   const [emailContent, setEmailContent] = useState('')
   const [selectedChannel, setSelectedChannel] = useState('email')
   const [sending, setSending] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedGuest, setEditedGuest] = useState(guest)
+  const [saving, setSaving] = useState(false)
 
   const handleSendEmail = async (template) => {
     setSending(true)
     try {
-      await messagesApi.send(guest.id, emailSubject, emailContent, template, selectedChannel)
+      await messagesApi.send(editedGuest.id, emailSubject, emailContent, template, selectedChannel)
       setEmailSubject('')
       setEmailContent('')
       alert(`${selectedChannel === 'email' ? 'Email' : 'Telegram message'} sent successfully!`)
@@ -121,8 +124,34 @@ function GuestDetail({ guest, onBack, onUpdate }) {
     }
   }
 
+  useEffect(() => {
+    setEditedGuest(guest)
+  }, [guest])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await guestsApi.update(guest.id, editedGuest)
+      setIsEditing(false)
+      onUpdate()
+      // Reload guest detail
+      const updated = await guestsApi.get(guest.id)
+      setEditedGuest(updated)
+    } catch (err) {
+      console.error('Failed to update guest:', err)
+      alert('Failed to update guest. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setEditedGuest(guest)
+    setIsEditing(false)
+  }
+
   const getArrivalIcon = () => {
-    switch (guest.arrival_method) {
+    switch (editedGuest.arrival_method) {
       case 'flight': return <Plane size={16} />
       case 'train': return <Train size={16} />
       case 'car': return <Car size={16} />
@@ -137,20 +166,57 @@ function GuestDetail({ guest, onBack, onUpdate }) {
           <ArrowLeft size={18} />
           Back to Guests
         </button>
+        {!isEditing ? (
+          <button className="edit-btn" onClick={() => setIsEditing(true)}>
+            <Edit2 size={16} />
+            Edit Profile
+          </button>
+        ) : (
+          <div className="edit-actions">
+            <button className="cancel-btn" onClick={handleCancel}>
+              <X size={16} />
+              Cancel
+            </button>
+            <button className="save-btn" onClick={handleSave} disabled={saving}>
+              <Save size={16} />
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="detail-profile">
         <div className="profile-avatar">
-          {guest.name.split(' ').map(n => n[0]).join('')}
+          {editedGuest.name.split(' ').map(n => n[0]).join('')}
         </div>
         <div className="profile-info">
-          <h1>{guest.name}</h1>
+          {isEditing ? (
+            <input
+              type="text"
+              className="edit-name-input"
+              value={editedGuest.name}
+              onChange={(e) => setEditedGuest({ ...editedGuest, name: e.target.value })}
+              placeholder="Guest Name"
+            />
+          ) : (
+            <h1>{editedGuest.name}</h1>
+          )}
           <div className="profile-meta">
-            <span className="room-badge large">Room {guest.room_number}</span>
-            {guest.arrival_method && (
+            {isEditing ? (
+              <input
+                type="text"
+                className="edit-room-input"
+                value={editedGuest.room_number || ''}
+                onChange={(e) => setEditedGuest({ ...editedGuest, room_number: e.target.value })}
+                placeholder="Room Number"
+              />
+            ) : (
+              <span className="room-badge large">Room {editedGuest.room_number}</span>
+            )}
+            {editedGuest.arrival_method && (
               <span className="arrival-badge large">
                 {getArrivalIcon()}
-                {guest.flight_number || guest.arrival_method}
+                {editedGuest.flight_number || editedGuest.arrival_method}
               </span>
             )}
           </div>
@@ -186,11 +252,45 @@ function GuestDetail({ guest, onBack, onUpdate }) {
               <div className="info-grid">
                 <div className="info-item">
                   <Mail size={16} />
-                  <span>{guest.contact_email || 'No email'}</span>
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      className="edit-field"
+                      value={editedGuest.contact_email || ''}
+                      onChange={(e) => setEditedGuest({ ...editedGuest, contact_email: e.target.value })}
+                      placeholder="Email"
+                    />
+                  ) : (
+                    <span>{editedGuest.contact_email || 'No email'}</span>
+                  )}
                 </div>
                 <div className="info-item">
                   <Phone size={16} />
-                  <span>{guest.contact_phone || 'No phone'}</span>
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      className="edit-field"
+                      value={editedGuest.contact_phone || ''}
+                      onChange={(e) => setEditedGuest({ ...editedGuest, contact_phone: e.target.value })}
+                      placeholder="Phone"
+                    />
+                  ) : (
+                    <span>{editedGuest.contact_phone || 'No phone'}</span>
+                  )}
+                </div>
+                <div className="info-item">
+                  <MessageSquare size={16} />
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="edit-field"
+                      value={editedGuest.telegram_chat_id || ''}
+                      onChange={(e) => setEditedGuest({ ...editedGuest, telegram_chat_id: e.target.value })}
+                      placeholder="Telegram Chat ID"
+                    />
+                  ) : (
+                    <span>{editedGuest.telegram_chat_id || 'No Telegram chat ID'}</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -200,23 +300,68 @@ function GuestDetail({ guest, onBack, onUpdate }) {
               <div className="info-grid">
                 <div className="info-item">
                   <Calendar size={16} />
-                  <span>Check-in: {new Date(guest.check_in_date).toLocaleString()}</span>
+                  {isEditing ? (
+                    <input
+                      type="datetime-local"
+                      className="edit-field"
+                      value={editedGuest.check_in_date ? new Date(editedGuest.check_in_date).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => setEditedGuest({ ...editedGuest, check_in_date: new Date(e.target.value).toISOString() })}
+                    />
+                  ) : (
+                    <span>Check-in: {new Date(editedGuest.check_in_date).toLocaleString()}</span>
+                  )}
                 </div>
-                {guest.flight_number && (
+                <div className="info-item">
+                  <Plane size={16} />
+                  {isEditing ? (
+                    <select
+                      className="edit-field"
+                      value={editedGuest.arrival_method || ''}
+                      onChange={(e) => setEditedGuest({ ...editedGuest, arrival_method: e.target.value })}
+                    >
+                      <option value="">Select method</option>
+                      <option value="flight">Flight</option>
+                      <option value="train">Train</option>
+                      <option value="car">Car</option>
+                      <option value="bus">Bus</option>
+                    </select>
+                  ) : (
+                    <span>Arrival: {editedGuest.arrival_method || 'Not specified'}</span>
+                  )}
+                </div>
+                {editedGuest.arrival_method === 'flight' && (
                   <div className="info-item">
                     <Plane size={16} />
-                    <span>Flight: {guest.flight_number}</span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        className="edit-field"
+                        value={editedGuest.flight_number || ''}
+                        onChange={(e) => setEditedGuest({ ...editedGuest, flight_number: e.target.value })}
+                        placeholder="Flight Number"
+                      />
+                    ) : (
+                      <span>Flight: {editedGuest.flight_number || 'Not specified'}</span>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
-            {guest.notes && (
-              <div className="info-section">
-                <h3>Notes</h3>
-                <p className="notes-text">{guest.notes}</p>
-              </div>
-            )}
+            <div className="info-section">
+              <h3>Notes</h3>
+              {isEditing ? (
+                <textarea
+                  className="edit-notes"
+                  value={editedGuest.notes || ''}
+                  onChange={(e) => setEditedGuest({ ...editedGuest, notes: e.target.value })}
+                  placeholder="Notes about the guest..."
+                  rows={4}
+                />
+              ) : (
+                <p className="notes-text">{editedGuest.notes || 'No notes'}</p>
+              )}
+            </div>
           </div>
         )}
 
@@ -232,20 +377,20 @@ function GuestDetail({ guest, onBack, onUpdate }) {
                   <button 
                     className={`channel-btn ${selectedChannel === 'email' ? 'active' : ''}`}
                     onClick={() => setSelectedChannel('email')}
-                    disabled={!guest.contact_email}
+                    disabled={!editedGuest.contact_email}
                   >
                     <Mail size={16} />
                     Email
-                    {!guest.contact_email && <span className="unavailable">(No email)</span>}
+                    {!editedGuest.contact_email && <span className="unavailable">(No email)</span>}
                   </button>
                   <button 
                     className={`channel-btn ${selectedChannel === 'telegram' ? 'active' : ''}`}
                     onClick={() => setSelectedChannel('telegram')}
-                    disabled={!guest.telegram_chat_id}
+                    disabled={!editedGuest.telegram_chat_id}
                   >
                     <MessageSquare size={16} />
                     Telegram
-                    {!guest.telegram_chat_id && <span className="unavailable">(No chat ID)</span>}
+                    {!editedGuest.telegram_chat_id && <span className="unavailable">(No chat ID)</span>}
                   </button>
                 </div>
               </div>
@@ -283,8 +428,8 @@ function GuestDetail({ guest, onBack, onUpdate }) {
 
             <div className="message-history">
               <h3>Message History</h3>
-              {guest.messages?.length > 0 ? (
-                guest.messages.map(msg => (
+              {editedGuest.messages?.length > 0 ? (
+                editedGuest.messages.map(msg => (
                   <div key={msg.id} className="message-item">
                     <div className="message-meta">
                       <span className={`message-channel channel-${msg.channel}`}>
@@ -309,8 +454,8 @@ function GuestDetail({ guest, onBack, onUpdate }) {
         {activeTab === 'tickets' && (
           <div className="tickets-tab">
             <h3>Related Tickets</h3>
-            {guest.tickets?.length > 0 ? (
-              guest.tickets.map(ticket => (
+            {editedGuest.tickets?.length > 0 ? (
+              editedGuest.tickets.map(ticket => (
                 <div key={ticket.id} className="ticket-item">
                   <div className="ticket-status">{ticket.status}</div>
                   <div className="ticket-content">
@@ -377,6 +522,13 @@ function Guests() {
     }
   }
 
+  const handleGuestUpdate = () => {
+    loadGuests()
+    if (selectedGuest) {
+      loadGuestDetail(selectedGuest.id)
+    }
+  }
+
   const handleGuestClick = (guest) => {
     navigate(`/guests/${guest.id}`)
   }
@@ -385,13 +537,47 @@ function Guests() {
     navigate('/guests')
   }
 
-  const filteredGuests = guests.filter(guest => {
+  // Helper function to get last name from full name
+  const getLastName = (name) => {
+    const parts = name.trim().split(/\s+/)
+    return parts.length > 1 ? parts[parts.length - 1] : parts[0]
+  }
+
+  // Sort guests alphabetically by last name
+  const sortedGuests = [...guests].sort((a, b) => {
+    const lastNameA = getLastName(a.name).toLowerCase()
+    const lastNameB = getLastName(b.name).toLowerCase()
+    if (lastNameA < lastNameB) return -1
+    if (lastNameA > lastNameB) return 1
+    // If last names are equal, sort by first name
+    const firstNameA = a.name.trim().split(/\s+/)[0].toLowerCase()
+    const firstNameB = b.name.trim().split(/\s+/)[0].toLowerCase()
+    return firstNameA.localeCompare(firstNameB)
+  })
+
+  // Filter guests with search prioritizing last name
+  const filteredGuests = sortedGuests.filter(guest => {
     if (!search) return true
-    const searchLower = search.toLowerCase()
-    return (
-      guest.name.toLowerCase().includes(searchLower) ||
-      guest.room_number?.includes(search)
-    )
+    const searchLower = search.toLowerCase().trim()
+    const nameParts = guest.name.toLowerCase().split(/\s+/)
+    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0]
+    const firstName = nameParts[0]
+    
+    // Prioritize last name match
+    if (lastName.startsWith(searchLower)) return true
+    if (lastName.includes(searchLower)) return true
+    
+    // Then check first name
+    if (firstName.startsWith(searchLower)) return true
+    if (firstName.includes(searchLower)) return true
+    
+    // Then check full name
+    if (guest.name.toLowerCase().includes(searchLower)) return true
+    
+    // Finally check room number
+    if (guest.room_number?.toLowerCase().includes(searchLower)) return true
+    
+    return false
   })
 
   if (selectedGuest) {
@@ -399,7 +585,7 @@ function Guests() {
       <GuestDetail 
         guest={selectedGuest} 
         onBack={handleBack}
-        onUpdate={loadGuests}
+        onUpdate={handleGuestUpdate}
       />
     )
   }
@@ -419,7 +605,7 @@ function Guests() {
           <Search size={16} />
           <input
             type="text"
-            placeholder="Search guests..."
+            placeholder="Search by last name, first name, or room..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

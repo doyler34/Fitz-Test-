@@ -123,18 +123,24 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params
     const updates = req.body
 
+    // Only exclude protected/system fields - allow all other fields to be updated
+    const { id: _, created_at, updated_at, ...filteredUpdates } = updates
+
     const { data, error } = await supabase
       .from('guests')
-      .update(updates)
+      .update(filteredUpdates)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase update error:', error)
+      return res.status(400).json({ error: error.message || 'Failed to update guest', details: error })
+    }
     res.json(data)
   } catch (err) {
     console.error('Update guest error:', err)
-    res.status(500).json({ error: 'Failed to update guest' })
+    res.status(500).json({ error: err.message || 'Failed to update guest' })
   }
 })
 

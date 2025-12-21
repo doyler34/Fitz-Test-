@@ -131,7 +131,16 @@ function GuestDetail({ guest, onBack, onUpdate }) {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await guestsApi.update(guest.id, editedGuest)
+      // Exclude related data arrays and protected fields, but allow all other guest fields
+      const { tickets, messages, id, created_at, updated_at, ...updateData } = editedGuest
+      
+      // Clean up empty strings to null for optional fields
+      const cleanedData = {}
+      for (const [key, value] of Object.entries(updateData)) {
+        cleanedData[key] = value === '' ? null : value
+      }
+      
+      await guestsApi.update(guest.id, cleanedData)
       setIsEditing(false)
       onUpdate()
       // Reload guest detail
@@ -139,7 +148,8 @@ function GuestDetail({ guest, onBack, onUpdate }) {
       setEditedGuest(updated)
     } catch (err) {
       console.error('Failed to update guest:', err)
-      alert('Failed to update guest. Please try again.')
+      const errorMessage = err.message || err.error || 'Failed to update guest. Please try again.'
+      alert(errorMessage)
     } finally {
       setSaving(false)
     }
